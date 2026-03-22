@@ -93,6 +93,41 @@ npm run build
 
 Deploy to Vercel and set the same environment variables in Project Settings.
 
+## CI/CD (No Docker)
+
+This repository uses GitHub Actions and does not require Docker.
+
+- CI workflow: [.github/workflows/ci.yml](.github/workflows/ci.yml)
+- CD workflow: [.github/workflows/deploy-vercel.yml](.github/workflows/deploy-vercel.yml)
+
+What runs automatically:
+
+- On every pull request: lint and build
+- On pull requests (when Vercel secrets are configured): preview deploy
+- On pushes to master or main (when Vercel secrets are configured): production deploy
+
+### Required GitHub repository secrets
+
+Add these in GitHub: Settings -> Secrets and variables -> Actions -> New repository secret.
+
+- `VERCEL_TOKEN`
+- `VERCEL_ORG_ID`
+- `VERCEL_PROJECT_ID`
+
+Also add your app secrets for runtime usage in Vercel project settings:
+
+- `NOTION_API_KEY`
+- `NOTION_DATABASE_ID`
+- `NOTION_PROFILE_PAGE_ID` (optional)
+- `NOTION_PROFILE_DATABASE_ID` (optional)
+
+### How to get Vercel values
+
+1. Connect your GitHub repository to a Vercel project.
+2. In Vercel account settings, create an access token for `VERCEL_TOKEN`.
+3. In Vercel project settings, copy Organization ID and Project ID.
+4. Save all three values in your GitHub repository secrets.
+
 ## Security Notes
 
 - Never commit `.env.local`.

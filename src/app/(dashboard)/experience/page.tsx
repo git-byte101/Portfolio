@@ -1,39 +1,10 @@
-interface ExperienceItem {
-  period: string;
-  role: string;
-  company: string;
-  summary: string;
-  highlights: string[];
-}
+import { getExperienceEntries } from "@/services/site-content";
 
-const experienceTimeline: ExperienceItem[] = [
-  {
-    period: "Nov 2025 - Jan 2026",
-    role: "Project-Based Automation Builder",
-    company: "Independent Project Work",
-    summary:
-      "Delivered beginner-to-intermediate automation projects focused on website workflow and social media process automation.",
-    highlights: [
-      "Built website automation workflows using Notion, GoHighLevel (GHL), and Twilio.",
-      "Implemented Instagram automation flows using GHL and ManyChat.",
-      "Configured project-based automations to reduce repetitive manual tasks.",
-    ],
-  },
-  {
-    period: "May 2025 - Aug 2025",
-    role: "IT Intern",
-    company: "Vantrippers Travel and Tours",
-    summary:
-      "Completed internship focused on supporting website development and practical IT tasks in a real business environment.",
-    highlights: [
-      "Contributed to building the company website using PHP and CodeIgniter.",
-      "Worked with a legacy CSS framework to style and update web pages.",
-      "Supported basic testing, bug fixes, and implementation tasks during development.",
-    ],
-  },
-];
+export const revalidate = 60;
 
-export default function ExperiencePage() {
+export default async function ExperiencePage() {
+  const experienceTimeline = await getExperienceEntries();
+
   return (
     <section className="mx-auto flex min-h-full w-full max-w-7xl flex-col gap-4 pb-4 md:gap-5 md:pb-6">
       <section className="mecha-panel rounded-2xl border border-oak-primary/20 bg-oak-surface/70 p-5 md:p-7">

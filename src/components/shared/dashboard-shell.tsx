@@ -9,6 +9,12 @@ import { useEffect, useState } from "react";
 interface DashboardShellProps {
   children: React.ReactNode;
   profilePhotoSrc: string;
+  profileName: string;
+  sidebarFootnote: string;
+  dashboardTitle: string;
+  dashboardSubtitle: string;
+  resumeFileUrl: string;
+  resumeFileName: string;
 }
 
 interface NavItem {
@@ -30,6 +36,12 @@ function isNavItemActive(pathname: string, href: NavItem["href"]): boolean {
 export function DashboardShell({
   children,
   profilePhotoSrc,
+  profileName,
+  sidebarFootnote,
+  dashboardTitle,
+  dashboardSubtitle,
+  resumeFileUrl,
+  resumeFileName,
 }: DashboardShellProps) {
   const pathname = usePathname();
   const router = useRouter();
@@ -114,7 +126,7 @@ export function DashboardShell({
               Tech Profile
             </p>
             <h1 className="sidebar-name mt-2 text-2xl font-bold text-oak-text">
-              PAULO
+              {profileName}
             </h1>
 
             <div className="mt-5">
@@ -147,8 +159,7 @@ export function DashboardShell({
           </LayoutGroup>
 
           <p className="sidebar-footnote text-xs text-oak-muted">
-            Fresh graduate in Information Technology focused on building
-            practical skills in support, systems, and software fundamentals.
+            {sidebarFootnote}
           </p>
         </aside>
 
@@ -156,10 +167,10 @@ export function DashboardShell({
           <header className="oak-card top-header-mecha mb-3 flex min-h-16 items-center justify-between px-4 py-3 md:mb-4 md:px-6">
             <div>
               <p className="text-xs uppercase tracking-[0.18em] text-oak-muted">
-                Portfolio Dashboard
+                {dashboardTitle}
               </p>
               <p className="text-sm font-semibold text-oak-text md:text-base">
-                Fresh Graduate IT Profile
+                {dashboardSubtitle}
               </p>
             </div>
 
@@ -183,8 +194,8 @@ export function DashboardShell({
                 View Resume
               </a>
               <a
-                href="/RAMOS_CV.pdf"
-                download="RAMOS_CV.pdf"
+                href={resumeFileUrl}
+                download={resumeFileName}
                 className="hidden rounded-full bg-oak-primary px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-oak-surface transition hover:opacity-90 sm:block"
               >
                 Download Resume

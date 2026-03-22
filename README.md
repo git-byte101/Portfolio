@@ -1,6 +1,6 @@
 # Portfolio App
 
-Production-style personal portfolio built with Next.js App Router, TypeScript, and Notion as a headless CMS.
+Production-style personal portfolio built with Next.js App Router, TypeScript, and Supabase as a dynamic backend.
 
 ## Stack
 
@@ -8,15 +8,16 @@ Production-style personal portfolio built with Next.js App Router, TypeScript, a
 - React 19
 - TypeScript 5
 - Tailwind CSS 4
-- Notion API
+- Supabase (PostgreSQL + REST)
 
 ## Features
 
 - Dashboard-style homepage with overview panels
-- Projects page powered by Notion with fallback local data
+- Projects page powered by Supabase with fallback local data
 - Contact page with social links and tools marquee
 - Resume preview and download
 - Theme toggle (oak/slate)
+- Admin CRUD API for profile, projects, experience, social links, tool badges, and resumes
 
 ## Routes
 
@@ -40,7 +41,7 @@ npm install
 cp .env.example .env.local
 ```
 
-3. Fill in your Notion values in `.env.local`.
+3. Fill in your Supabase values in `.env.local`.
 
 4. Start development server.
 
@@ -54,33 +55,38 @@ Open http://localhost:3000.
 
 Required:
 
-- `NOTION_API_KEY`
-- `NOTION_DATABASE_ID`
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `SUPABASE_SERVICE_ROLE_KEY`
+- `ADMIN_API_TOKEN`
 
-Optional:
+## Supabase Setup
 
-- `NOTION_PROFILE_PAGE_ID`
-- `NOTION_PROFILE_DATABASE_ID`
+1. Create a new Supabase project.
+2. Run SQL from `supabase/schema.sql` in the Supabase SQL editor.
+3. Copy project URL and keys into `.env.local`.
+4. Use `ADMIN_API_TOKEN` in request headers when calling `/api/admin/*` routes.
 
-The app will try `NOTION_PROFILE_PAGE_ID` first, then `NOTION_PROFILE_DATABASE_ID` for the profile image source.
+## Admin API
 
-## Notion Setup
+All write endpoints require either:
 
-Projects database recommended properties:
+- `x-admin-token: <ADMIN_API_TOKEN>`
+- or `Authorization: Bearer <ADMIN_API_TOKEN>`
 
-- Name (Title)
-- Description (Rich text)
-- Tech Stack (Multi-select)
-- Category (Select)
-- Status (Select)
-- Slug (Text)
-- Repo URL (URL)
-- Live URL (URL)
-- Version (Text)
-- Featured (Checkbox)
-- Sort Order (Number)
+Available resources:
 
-For profile photo, use a page or database row with a `Files & media` property named `Profile Image`.
+- `GET/POST /api/admin/projects`
+- `GET/PATCH/DELETE /api/admin/projects/:id`
+- `GET/PUT /api/admin/profile`
+- `GET/POST /api/admin/experience`
+- `GET/PATCH/DELETE /api/admin/experience/:id`
+- `GET/POST /api/admin/social-links`
+- `GET/PATCH/DELETE /api/admin/social-links/:id`
+- `GET/POST /api/admin/tool-badges`
+- `GET/PATCH/DELETE /api/admin/tool-badges/:id`
+- `GET/POST /api/admin/resumes`
+- `GET/PATCH/DELETE /api/admin/resumes/:id`
 
 ## Build And Lint
 
@@ -116,10 +122,10 @@ Add these in GitHub: Settings -> Secrets and variables -> Actions -> New reposit
 
 Also add your app secrets for runtime usage in Vercel project settings:
 
-- `NOTION_API_KEY`
-- `NOTION_DATABASE_ID`
-- `NOTION_PROFILE_PAGE_ID` (optional)
-- `NOTION_PROFILE_DATABASE_ID` (optional)
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `SUPABASE_SERVICE_ROLE_KEY`
+- `ADMIN_API_TOKEN`
 
 ### How to get Vercel values
 

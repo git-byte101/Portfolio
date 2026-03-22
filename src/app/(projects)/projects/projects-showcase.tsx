@@ -15,10 +15,10 @@ const FALLBACK_PROJECTS: ProjectRecord[] = [
     id: "fallback-project",
     title: "Project Data Unavailable",
     category: "Programming",
-    techStack: ["Notion API", "Next.js"],
+    techStack: ["Supabase", "Next.js"],
     version: "v1.0.0",
     status: "Production",
-    summary: "No projects were returned from Notion at this time.",
+    summary: "No projects were returned from the configured content backend.",
     thumbnailSrc: "/images/project-placeholder.svg",
   },
 ];
@@ -105,7 +105,7 @@ export function ProjectsShowcase({ projects }: ProjectsShowcaseProps) {
             priority={activeProject.id === safeProjects[0].id}
           />
           <div className="absolute inset-0 bg-black/48" />
-          <div className="absolute inset-0 bg-gradient-to-r from-black/72 via-black/48 to-transparent" />
+          <div className="absolute inset-0 bg-linear-to-r from-black/72 via-black/48 to-transparent" />
         </motion.div>
       </AnimatePresence>
 

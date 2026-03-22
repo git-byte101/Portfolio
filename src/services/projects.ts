@@ -1,5 +1,5 @@
 import { type ProjectRecord } from "@/types/project";
-import { fetchNotionProjects } from "@/lib/notion";
+import { getSupabaseAdminClient, isSupabaseConfigured } from "@/lib/supabase";
 import { unstable_cache } from "next/cache";
 
 const PROJECTS: ProjectRecord[] = [
@@ -131,12 +131,44 @@ let inMemoryProjectsCache: ProjectRecord[] | null = null;
 let inMemoryProjectsCacheExpiresAt = 0;
 let inFlightProjectsRefresh: Promise<ProjectRecord[]> | null = null;
 
-const getCachedNotionProjects = unstable_cache(
+const getCachedSupabaseProjects = unstable_cache(
   async () => {
+    if (!isSupabaseConfigured()) {
+      return [];
+    }
+
     try {
-      return await fetchNotionProjects();
+      const { data, error } = await getSupabaseAdminClient()
+        .from("projects")
+        .select(
+          "id, title, slug, category, tech_stack, version, status, summary, thumbnail_src, repo_url, live_url, featured, sort_order",
+        )
+        .order("sort_order", { ascending: true, nullsFirst: false });
+
+      if (error) {
+        throw error;
+      }
+
+      return (data ?? []).map((row) => ({
+        id: row.id as string,
+        title: (row.title as string) ?? "",
+        slug: (row.slug as string | null) ?? undefined,
+        category: ((row.category as string) ?? "Programming") as ProjectRecord["category"],
+        techStack: Array.isArray(row.tech_stack)
+          ? row.tech_stack.filter((value): value is string => typeof value === "string")
+          : [],
+        version: (row.version as string) ?? "v1.0.0",
+        status: ((row.status as string) ?? "Production") as ProjectRecord["status"],
+        summary: (row.summary as string) ?? "",
+        thumbnailSrc:
+          (row.thumbnail_src as string) || "/images/project-placeholder.svg",
+        repoUrl: (row.repo_url as string | null) ?? undefined,
+        liveUrl: (row.live_url as string | null) ?? undefined,
+        featured: row.featured === true,
+        sortOrder: typeof row.sort_order === "number" ? row.sort_order : undefined,
+      }));
     } catch (error) {
-      console.error("Failed to load Notion projects, using fallback data.", error);
+      console.error("Failed to load Supabase projects, using fallback data.", error);
       return [];
     }
   },
@@ -145,8 +177,8 @@ const getCachedNotionProjects = unstable_cache(
 );
 
 async function refreshProjectsCache(): Promise<ProjectRecord[]> {
-  const notionProjects = await getCachedNotionProjects();
-  const resolvedProjects = notionProjects.length ? notionProjects : PROJECTS;
+  const supabaseProjects = await getCachedSupabaseProjects();
+  const resolvedProjects = supabaseProjects.length ? supabaseProjects : PROJECTS;
 
   inMemoryProjectsCache = resolvedProjects;
   inMemoryProjectsCacheExpiresAt = Date.now() + PROJECTS_CACHE_TTL_MS;

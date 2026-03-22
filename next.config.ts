@@ -6,8 +6,8 @@ const nextConfig: NextConfig = {
     qualities: [40, 75],
     remotePatterns: [
       { protocol: "https", hostname: "*.amazonaws.com" },
-      { protocol: "https", hostname: "*.notion.site" },
-      { protocol: "https", hostname: "*.notion-static.com" },
+      { protocol: "https", hostname: "*.supabase.co" },
+      { protocol: "https", hostname: "*.supabase.in" },
       { protocol: "https", hostname: "images.unsplash.com" },
     ],
   },

@@ -1,26 +1,724 @@
 @import "tailwindcss";
+@source "./**/*.{ts,tsx,js,jsx,mdx}";
+@source "../components/**/*.{ts,tsx,js,jsx,mdx}";
+@source "../lib/**/*.{ts,tsx,js,jsx,mdx}";
+@source "../services/**/*.{ts,tsx,js,jsx,mdx}";
+
+@theme {
+  --font-sans: var(--font-body);
+
+  --color-oak-bg: #eae6df;
+  --color-oak-surface: #f5f3ef;
+  --color-oak-primary: #6b4e31;
+  --color-oak-accent: #4a5d23;
+  --color-oak-text: #2c2b29;
+  --color-oak-muted: #8c877d;
+}
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  color-scheme: light;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+:root[data-theme="slate"] {
+  --color-oak-bg: #d8e0e8;
+  --color-oak-surface: #edf2f7;
+  --color-oak-primary: #2f4858;
+  --color-oak-accent: #0f766e;
+  --color-oak-text: #18222d;
+  --color-oak-muted: #5f6f7f;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+:root {
+  --sidebar-mecha-edge: color-mix(in oklab, var(--color-oak-primary) 34%, transparent);
+  --sidebar-mecha-line: color-mix(in oklab, var(--color-oak-primary) 18%, white);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  width: 100%;
+  height: 100%;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-body), "Segoe UI", sans-serif;
+  background:
+    radial-gradient(circle at 0% 0%, color-mix(in oklab, white 72%, var(--color-oak-bg)), transparent 42%),
+    radial-gradient(circle at 100% 100%, color-mix(in oklab, var(--color-oak-accent) 10%, transparent), transparent 40%),
+    var(--color-oak-bg);
+  color: var(--color-oak-text);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.dashboard-shell {
+  position: relative;
+  background:
+    linear-gradient(
+      160deg,
+      color-mix(in oklab, var(--color-oak-surface) 38%, transparent),
+      transparent 45%
+    );
+}
+
+.dashboard-shell-inner {
+  position: relative;
+  z-index: 10;
+}
+
+.oak-card {
+  border: 1px solid color-mix(in oklab, var(--color-oak-primary) 20%, transparent);
+  background: linear-gradient(
+    155deg,
+    color-mix(in oklab, white 74%, var(--color-oak-surface)),
+    color-mix(in oklab, var(--color-oak-surface) 88%, transparent)
+  );
+  box-shadow: 0 10px 30px color-mix(in oklab, var(--color-oak-text) 12%, transparent);
+  transition:
+    border-color 220ms ease,
+    box-shadow 220ms ease,
+    transform 220ms ease;
+  border-radius: 1rem;
+}
+
+.oak-card:hover {
+  border-color: color-mix(in oklab, var(--color-oak-primary) 28%, transparent);
+  box-shadow: 0 16px 34px color-mix(in oklab, var(--color-oak-text) 14%, transparent);
+}
+
+.top-header-mecha {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border-color: color-mix(in oklab, var(--color-oak-primary) 34%, transparent);
+  clip-path: polygon(0 0, 91% 0, 96% 8%, 100% 8%, 100% 100%, 0 100%);
+  box-shadow:
+    0 12px 26px color-mix(in oklab, var(--color-oak-text) 10%, transparent),
+    0 0 0 1px color-mix(in oklab, white 36%, transparent);
+}
+
+.top-header-mecha::before {
+  content: "";
+  position: absolute;
+  inset: 0.52rem;
+  border: 1px solid color-mix(in oklab, var(--color-oak-primary) 16%, transparent);
+  border-radius: 0.72rem;
+  clip-path: polygon(0 0, 92% 0, 97% 9%, 100% 9%, 100% 100%, 0 100%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.top-header-mecha::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, color-mix(in oklab, var(--color-oak-primary) 22%, transparent), color-mix(in oklab, var(--color-oak-primary) 22%, transparent)) 1.1rem 0.95rem / 3.2rem 1px no-repeat,
+    linear-gradient(90deg, color-mix(in oklab, var(--color-oak-primary) 20%, transparent), color-mix(in oklab, var(--color-oak-primary) 20%, transparent)) calc(100% - 4.3rem) calc(100% - 0.95rem) / 3.2rem 1px no-repeat,
+    linear-gradient(180deg, color-mix(in oklab, var(--color-oak-primary) 18%, transparent), color-mix(in oklab, var(--color-oak-primary) 18%, transparent)) 1.1rem 0.95rem / 1px 2.1rem no-repeat;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.92;
+}
+
+.top-header-mecha > * {
+  position: relative;
+  z-index: 1;
+}
+
+.mecha-panel,
+.mecha-panel-soft,
+.mecha-panel-mini {
+  position: relative;
+  isolation: isolate;
+}
+
+.mecha-panel > *,
+.mecha-panel-soft > *,
+.mecha-panel-mini > * {
+  position: relative;
+  z-index: 1;
+}
+
+.mecha-panel {
+  overflow: hidden;
+  clip-path: polygon(0 0, 86% 0, 93% 5%, 100% 5%, 100% 86%, 95% 93%, 95% 100%, 0 100%);
+  border-color: color-mix(in oklab, var(--color-oak-primary) 34%, transparent);
+  box-shadow:
+    0 14px 30px color-mix(in oklab, var(--color-oak-text) 10%, transparent),
+    0 0 0 1px color-mix(in oklab, white 40%, transparent);
+}
+
+.mecha-panel::before {
+  content: "";
+  position: absolute;
+  inset: 7px;
+  border: 1px solid color-mix(in oklab, var(--color-oak-primary) 16%, transparent);
+  border-radius: 0.72rem;
+  clip-path: polygon(0 0, 88% 0, 95% 6%, 100% 6%, 100% 86%, 94% 93%, 94% 100%, 0 100%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.mecha-panel::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, color-mix(in oklab, var(--color-oak-primary) 20%, transparent), color-mix(in oklab, var(--color-oak-primary) 20%, transparent)) 1rem 1rem / 2.9rem 1px no-repeat,
+    linear-gradient(90deg, color-mix(in oklab, var(--color-oak-primary) 20%, transparent), color-mix(in oklab, var(--color-oak-primary) 20%, transparent)) calc(100% - 4rem) calc(100% - 1.1rem) / 3rem 1px no-repeat;
+  pointer-events: none;
+  opacity: 0.9;
+  z-index: 0;
+}
+
+.mecha-panel-soft {
+  overflow: hidden;
+  clip-path: polygon(0 0, 90% 0, 96% 7%, 100% 7%, 100% 88%, 95% 94%, 95% 100%, 0 100%);
+  border-color: color-mix(in oklab, var(--color-oak-primary) 24%, transparent);
+  box-shadow: 0 10px 24px color-mix(in oklab, var(--color-oak-text) 8%, transparent);
+}
+
+.mecha-panel-soft::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(140deg, color-mix(in oklab, white 40%, transparent), transparent 52%),
+    linear-gradient(90deg, color-mix(in oklab, var(--color-oak-primary) 14%, transparent), color-mix(in oklab, var(--color-oak-primary) 14%, transparent)) 0.8rem 0.8rem / 2.1rem 1px no-repeat;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.88;
+}
+
+.mecha-panel-mini {
+  overflow: hidden;
+  clip-path: polygon(0 0, 92% 0, 100% 11%, 100% 100%, 0 100%);
+  border-color: color-mix(in oklab, var(--color-oak-primary) 20%, transparent);
+}
+
+.mecha-panel-mini::before {
+  content: "";
+  position: absolute;
+  top: 0.55rem;
+  right: 0.55rem;
+  width: 0.6rem;
+  height: 0.6rem;
+  border-top: 1px solid color-mix(in oklab, var(--color-oak-primary) 28%, transparent);
+  border-right: 1px solid color-mix(in oklab, var(--color-oak-primary) 28%, transparent);
+  opacity: 0.9;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.mecha-border,
+.mecha-border-soft,
+.mecha-border-mini {
+  position: relative;
+  isolation: isolate;
+}
+
+.mecha-border > *,
+.mecha-border-soft > *,
+.mecha-border-mini > * {
+  position: relative;
+  z-index: 1;
+}
+
+.mecha-border::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  border: 1px solid color-mix(in oklab, var(--color-oak-primary) 26%, transparent);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.mecha-border::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background:
+    linear-gradient(90deg, color-mix(in oklab, var(--color-oak-primary) 24%, transparent), color-mix(in oklab, var(--color-oak-primary) 24%, transparent)) 0.95rem 0.95rem / 2.7rem 1px no-repeat,
+    linear-gradient(90deg, color-mix(in oklab, var(--color-oak-primary) 24%, transparent), color-mix(in oklab, var(--color-oak-primary) 24%, transparent)) calc(100% - 3.7rem) calc(100% - 0.95rem) / 2.7rem 1px no-repeat,
+    linear-gradient(180deg, color-mix(in oklab, var(--color-oak-primary) 22%, transparent), color-mix(in oklab, var(--color-oak-primary) 22%, transparent)) 0.95rem 0.95rem / 1px 2.5rem no-repeat,
+    linear-gradient(180deg, color-mix(in oklab, var(--color-oak-primary) 22%, transparent), color-mix(in oklab, var(--color-oak-primary) 22%, transparent)) calc(100% - 0.95rem) calc(100% - 3.45rem) / 1px 2.5rem no-repeat;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.mecha-border-soft::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  border: 1px solid color-mix(in oklab, var(--color-oak-primary) 18%, transparent);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.mecha-border-soft::after {
+  content: "";
+  position: absolute;
+  top: 0.6rem;
+  right: 0.6rem;
+  width: 0.68rem;
+  height: 0.68rem;
+  border-top: 1px solid color-mix(in oklab, var(--color-oak-primary) 28%, transparent);
+  border-right: 1px solid color-mix(in oklab, var(--color-oak-primary) 28%, transparent);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.mecha-border-mini::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  border: 1px solid color-mix(in oklab, var(--color-oak-primary) 14%, transparent);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.mecha-border-mini::after {
+  content: "";
+  position: absolute;
+  left: 0.45rem;
+  right: 0.45rem;
+  bottom: 0.45rem;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    color-mix(in oklab, var(--color-oak-primary) 16%, transparent),
+    color-mix(in oklab, var(--color-oak-primary) 2%, transparent)
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
+.sidebar-mecha {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border-width: 1.5px;
+  border-radius: 1.1rem;
+  border-color: color-mix(in oklab, var(--color-oak-primary) 44%, white);
+  clip-path: polygon(0 0, 85% 0, 92% 4%, 100% 4%, 100% 84%, 95% 92%, 95% 100%, 0 100%);
+  background:
+    linear-gradient(
+      160deg,
+      color-mix(in oklab, white 86%, var(--color-oak-surface)) 0%,
+      color-mix(in oklab, white 60%, var(--color-oak-surface)) 45%,
+      color-mix(in oklab, var(--color-oak-surface) 92%, transparent) 100%
+    );
+  box-shadow:
+    0 18px 38px color-mix(in oklab, var(--color-oak-text) 14%, transparent),
+    0 0 0 1px color-mix(in oklab, var(--color-oak-primary) 24%, transparent) inset,
+    0 0 0 1px color-mix(in oklab, white 50%, transparent);
+}
+
+.sidebar-mecha::before {
+  content: "";
+  position: absolute;
+  inset: 0.5px;
+  pointer-events: none;
+  background:
+    linear-gradient(150deg, color-mix(in oklab, white 70%, transparent), transparent 45%),
+    linear-gradient(90deg, color-mix(in oklab, var(--color-oak-primary) 30%, transparent), color-mix(in oklab, var(--color-oak-primary) 30%, transparent)) 0.9rem 14% / 3rem 1px no-repeat,
+    linear-gradient(90deg, color-mix(in oklab, var(--color-oak-primary) 30%, transparent), color-mix(in oklab, var(--color-oak-primary) 30%, transparent)) calc(100% - 3.8rem) calc(100% - 12%) / 3rem 1px no-repeat,
+    repeating-linear-gradient(
+      0deg,
+      transparent 0,
+      transparent 16px,
+      color-mix(in oklab, var(--color-oak-primary) 9%, transparent) 16px,
+      color-mix(in oklab, var(--color-oak-primary) 9%, transparent) 17px
+    );
+  opacity: 0.92;
+  z-index: 0;
+}
+
+.sidebar-mecha::after {
+  content: "";
+  position: absolute;
+  inset: 7px;
+  pointer-events: none;
+  border: 1px solid color-mix(in oklab, var(--color-oak-primary) 20%, transparent);
+  border-radius: 0.8rem;
+  clip-path: polygon(0 0, 88% 0, 95% 6%, 100% 6%, 100% 86%, 94% 93%, 94% 100%, 0 100%);
+  box-shadow: 0 0 0 1px color-mix(in oklab, white 40%, transparent) inset;
+  z-index: 0;
+}
+
+.sidebar-mecha,
+.sidebar-name,
+.sidebar-nav-text,
+.sidebar-kicker,
+.sidebar-footnote {
+  font-family: var(--font-sidebar), "Segoe UI", sans-serif;
+  font-variation-settings: "opsz" 34, "wdth" 102;
+}
+
+.sidebar-mecha > * {
+  position: relative;
+  z-index: 1;
+}
+
+.sidebar-kicker {
+  font-variation-settings: "opsz" 16, "wdth" 92;
+  letter-spacing: 0.28em;
+}
+
+.sidebar-name {
+  font-variation-settings: "opsz" 52, "wdth" 126;
+  letter-spacing: 0.08em;
+  text-shadow: 0 1px 0 color-mix(in oklab, white 55%, transparent);
+}
+
+.sidebar-nav {
+  position: relative;
+  z-index: 1;
+}
+
+.sidebar-nav-link {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid color-mix(in oklab, var(--color-oak-primary) 12%, transparent);
+  background: color-mix(in oklab, white 16%, transparent);
+  transition: border-color 220ms ease, background-color 220ms ease, box-shadow 220ms ease;
+}
+
+.sidebar-nav-link::after {
+  content: "";
+  position: absolute;
+  left: 0.9rem;
+  right: 1rem;
+  bottom: 0.45rem;
+  height: 1.5px;
+  background: linear-gradient(
+    90deg,
+    color-mix(in oklab, var(--color-oak-primary) 26%, transparent),
+    color-mix(in oklab, var(--color-oak-primary) 6%, transparent)
+  );
+  opacity: 0;
+  transform: scaleX(0.72);
+  transform-origin: left;
+  transition: opacity 200ms ease, transform 220ms ease;
+}
+
+.sidebar-nav-link:hover,
+.sidebar-nav-link:focus-visible {
+  border-color: color-mix(in oklab, var(--color-oak-primary) 38%, transparent);
+  background: color-mix(in oklab, white 36%, transparent);
+  box-shadow: 0 6px 16px color-mix(in oklab, var(--color-oak-text) 8%, transparent);
+}
+
+.sidebar-nav-link[aria-current="page"] {
+  border-color: color-mix(in oklab, var(--color-oak-primary) 45%, transparent);
+  background:
+    linear-gradient(
+      92deg,
+      color-mix(in oklab, var(--color-oak-primary) 13%, white),
+      color-mix(in oklab, var(--color-oak-primary) 5%, white)
+    );
+  box-shadow: 0 8px 16px color-mix(in oklab, var(--color-oak-text) 10%, transparent);
+}
+
+.sidebar-nav-link:hover::after,
+.sidebar-nav-link:focus-visible::after,
+.sidebar-nav-link[aria-current="page"]::after {
+  opacity: 1;
+  transform: scaleX(1);
+}
+
+.sidebar-active-rail {
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklab, white 52%, var(--color-oak-primary)),
+    var(--color-oak-primary)
+  );
+  box-shadow:
+    0 0 0 1px color-mix(in oklab, var(--color-oak-primary) 30%, transparent),
+    0 0 16px color-mix(in oklab, var(--color-oak-primary) 22%, transparent);
+}
+
+.sidebar-nav-text {
+  font-variation-settings: "opsz" 20, "wdth" 90;
+  letter-spacing: 0.05em;
+}
+
+.sidebar-footnote {
+  position: relative;
+  z-index: 1;
+  line-height: 1.5;
+}
+
+.tech-grid::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.55;
+  background:
+    linear-gradient(
+      105deg,
+      transparent 18%,
+      color-mix(in oklab, var(--color-oak-accent) 22%, white) 50%,
+      transparent 82%
+    );
+  transform: translateX(-130%);
+  animation: tech-scan 6.8s ease-in-out infinite;
+}
+
+.tech-grid::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.25;
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      transparent 0,
+      transparent 10px,
+      color-mix(in oklab, var(--color-oak-primary) 10%, transparent) 11px,
+      transparent 12px
+    );
+}
+
+.tech-tile {
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 8px 20px color-mix(in oklab, var(--color-oak-text) 8%, transparent);
+  transition:
+    border-color 220ms ease,
+    box-shadow 220ms ease,
+    background-color 220ms ease;
+}
+
+.tech-tile::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 240ms ease;
+  background: radial-gradient(
+    circle at 12% 8%,
+    color-mix(in oklab, var(--color-oak-accent) 20%, white),
+    transparent 45%
+  );
+}
+
+.group:hover .tech-tile {
+  border-color: color-mix(in oklab, var(--color-oak-accent) 48%, white);
+  box-shadow:
+    0 12px 24px color-mix(in oklab, var(--color-oak-text) 16%, transparent),
+    0 0 0 1px color-mix(in oklab, var(--color-oak-accent) 24%, transparent) inset;
+}
+
+.group:hover .tech-tile::after {
+  opacity: 1;
+}
+
+.tool-tooltip {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 0.45rem);
+  z-index: 20;
+  transform: translateX(-50%) translateY(4px);
+  border-radius: 0.5rem;
+  border: 1px solid color-mix(in oklab, var(--color-oak-primary) 25%, transparent);
+  background: color-mix(in oklab, white 88%, var(--color-oak-surface));
+  box-shadow: 0 8px 20px color-mix(in oklab, var(--color-oak-text) 12%, transparent);
+  padding: 0.32rem 0.5rem;
+  color: var(--color-oak-text);
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0;
+  pointer-events: none;
+  white-space: nowrap;
+  transition: opacity 160ms ease, transform 160ms ease;
+}
+
+.group:hover .tool-tooltip,
+.group:focus-within .tool-tooltip {
+  opacity: 1;
+  transform: translateX(-50%) translateY(-2px);
+}
+
+.tools-marquee-track {
+  will-change: transform;
+}
+
+.mecha-profile-frame {
+  --mecha-dark: #000000;
+  --mecha-red-deep: #991b1b;
+  --mecha-red-shadow: #450a0a;
+  --mecha-bezel: #b7b8bc;
+  --mecha-bezel-soft: #7f838b;
+  --mecha-core: #04070c;
+  position: relative;
+  width: 100%;
+  max-width: 13.5rem;
+  aspect-ratio: 1 / 1;
+  margin-inline: auto;
+  border-radius: 1rem;
+  overflow: hidden;
+  clip-path: polygon(0 15%, 13% 2%, 68% 2%, 76% 9%, 100% 9%, 100% 67%, 89% 77%, 89% 100%, 25% 100%, 17% 92%, 0 92%);
+  background:
+    linear-gradient(135deg, color-mix(in oklab, var(--mecha-red-shadow) 82%, black), var(--mecha-red-deep) 42%, #d71f2a 62%, #330205 95%);
+  box-shadow:
+    0 18px 38px color-mix(in oklab, black 70%, transparent),
+    0 0 0 1px color-mix(in oklab, black 30%, transparent) inset;
+}
+
+.mecha-profile-frame::before {
+  content: "";
+  position: absolute;
+  inset: 2px;
+  clip-path: inherit;
+  background:
+    linear-gradient(145deg, var(--mecha-bezel) 0%, color-mix(in oklab, white 65%, var(--mecha-bezel-soft)) 18%, #cdd0d5 32%, #686d76 52%, #dadde3 76%, #8c9097 100%);
+  opacity: 0.9;
+  z-index: 1;
+}
+
+.mecha-profile-frame::after {
+  content: "";
+  position: absolute;
+  right: 9%;
+  top: 7%;
+  width: 32%;
+  aspect-ratio: 1 / 1;
+  z-index: 4;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 50% 50%, white 0%, color-mix(in oklab, white 90%, #ffe3e3) 18%, color-mix(in oklab, white 25%, #f87171) 34%, rgba(255, 255, 255, 0) 68%);
+  filter: blur(0.3px);
+}
+
+.mecha-profile-bezel {
+  position: absolute;
+  inset: 8px;
+  clip-path: polygon(0 14%, 13% 0, 67% 0, 75% 8%, 100% 8%, 100% 66%, 89% 76%, 89% 100%, 25% 100%, 17% 92%, 0 92%);
+  background:
+    linear-gradient(120deg, #8e949d 0%, #d7dbe2 19%, #a3a8b1 41%, #f0f2f6 56%, #828891 74%, #dee2e8 100%);
+  padding: 2px;
+  z-index: 2;
+}
+
+.mecha-profile-core {
+  width: 100%;
+  height: 100%;
+  clip-path: polygon(0 14%, 13% 0, 67% 0, 75% 8%, 100% 8%, 100% 66%, 89% 76%, 89% 100%, 25% 100%, 17% 92%, 0 92%);
+  background:
+    linear-gradient(155deg, var(--mecha-red-deep) 0%, color-mix(in oklab, var(--mecha-red-deep) 65%, black) 26%, #0b0f15 56%, #000000 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.mecha-profile-core::before {
+  content: "";
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  top: 10%;
+  height: 16%;
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0), color-mix(in oklab, white 48%, #fecaca), rgba(255, 255, 255, 0));
+  opacity: 0.75;
+}
+
+.mecha-profile-slot {
+  position: absolute;
+  inset: 16% 11% 13%;
+  clip-path: polygon(0 12%, 12% 0, 74% 0, 84% 10%, 100% 10%, 100% 82%, 91% 92%, 91% 100%, 22% 100%, 15% 93%, 0 93%);
+  background:
+    radial-gradient(circle at 60% 28%, color-mix(in oklab, #1f2937 45%, #111827), rgba(0, 0, 0, 0) 45%),
+    linear-gradient(155deg, color-mix(in oklab, #0b1220 68%, black), var(--mecha-core));
+  border: 1px solid color-mix(in oklab, var(--mecha-bezel) 42%, transparent);
+  box-shadow:
+    0 0 0 2px color-mix(in oklab, black 55%, transparent) inset,
+    0 10px 20px color-mix(in oklab, black 60%, transparent);
+  display: grid;
+  place-items: center;
+}
+
+.mecha-profile-photo {
+  object-fit: cover;
+  object-position: center 26%;
+  filter: saturate(1.08) contrast(1.04);
+}
+
+.mecha-profile-slot::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      transparent 0,
+      transparent 8px,
+      color-mix(in oklab, #475569 28%, transparent) 9px,
+      transparent 10px
+    );
+  opacity: 0.22;
+  pointer-events: none;
+}
+
+.mecha-profile-hint {
+  position: relative;
+  z-index: 1;
+  color: color-mix(in oklab, #e2e8f0 88%, white);
+  font-size: 0.66rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-weight: 700;
+  opacity: 0.9;
+}
+
+@media (max-width: 1279px) {
+  .mecha-profile-frame {
+    max-width: 12rem;
+  }
+}
+
+
+@keyframes tech-scan {
+  0% {
+    transform: translateX(-130%);
+  }
+
+  62% {
+    transform: translateX(130%);
+  }
+
+  100% {
+    transform: translateX(130%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tech-grid::before {
+    animation: none;
+    opacity: 0;
+  }
+
+  .tech-tile,
+  .tech-tile::after,
+  .tool-tooltip,
+  .tools-marquee-track {
+    transition: none;
+  }
 }

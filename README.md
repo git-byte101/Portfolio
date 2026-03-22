@@ -1,36 +1,103 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Portfolio App
+
+Production-style personal portfolio built with Next.js App Router, TypeScript, and Notion as a headless CMS.
+
+## Stack
+
+- Next.js 16 (App Router)
+- React 19
+- TypeScript 5
+- Tailwind CSS 4
+- Notion API
+
+## Features
+
+- Dashboard-style homepage with overview panels
+- Projects page powered by Notion with fallback local data
+- Contact page with social links and tools marquee
+- Resume preview and download
+- Theme toggle (oak/slate)
+
+## Routes
+
+- / (overview)
+- /projects
+- /experience
+- /contact
+- /resume
 
 ## Getting Started
 
-First, run the development server:
+1. Install dependencies.
+
+```bash
+npm install
+```
+
+2. Create local environment variables.
+
+```bash
+cp .env.example .env.local
+```
+
+3. Fill in your Notion values in `.env.local`.
+
+4. Start development server.
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open http://localhost:3000.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Environment Variables
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Required:
 
-## Learn More
+- `NOTION_API_KEY`
+- `NOTION_DATABASE_ID`
 
-To learn more about Next.js, take a look at the following resources:
+Optional:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- `NOTION_PROFILE_PAGE_ID`
+- `NOTION_PROFILE_DATABASE_ID`
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+The app will try `NOTION_PROFILE_PAGE_ID` first, then `NOTION_PROFILE_DATABASE_ID` for the profile image source.
 
-## Deploy on Vercel
+## Notion Setup
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Projects database recommended properties:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Name (Title)
+- Description (Rich text)
+- Tech Stack (Multi-select)
+- Category (Select)
+- Status (Select)
+- Slug (Text)
+- Repo URL (URL)
+- Live URL (URL)
+- Version (Text)
+- Featured (Checkbox)
+- Sort Order (Number)
+
+For profile photo, use a page or database row with a `Files & media` property named `Profile Image`.
+
+## Build And Lint
+
+```bash
+npm run lint
+npm run build
+```
+
+## Deploy
+
+Deploy to Vercel and set the same environment variables in Project Settings.
+
+## Security Notes
+
+- Never commit `.env.local`.
+- If a key has ever been exposed, rotate it before going live.
+
+## License
+
+Personal portfolio project.

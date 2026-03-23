@@ -120,6 +120,29 @@ const DEFAULT_RESUMES: ResumeRecord[] = [
 ];
 
 const SETTINGS_CACHE_SECONDS = 60;
+const SUPABASE_QUERY_TIMEOUT_MS = 2500;
+
+async function withQueryTimeout<T>(
+  query: T,
+  label: string,
+): Promise<Awaited<T>> {
+  let timeoutHandle: ReturnType<typeof setTimeout> | undefined;
+
+  try {
+    return (await Promise.race([
+      Promise.resolve(query),
+      new Promise<never>((_, reject) => {
+        timeoutHandle = setTimeout(() => {
+          reject(new Error(`${label} timed out after ${SUPABASE_QUERY_TIMEOUT_MS}ms`));
+        }, SUPABASE_QUERY_TIMEOUT_MS);
+      }),
+    ])) as Awaited<T>;
+  } finally {
+    if (timeoutHandle) {
+      clearTimeout(timeoutHandle);
+    }
+  }
+}
 
 function normalizeStringArray(input: unknown): string[] {
   if (!Array.isArray(input)) {
@@ -182,11 +205,10 @@ const getCachedProfileSettings = unstable_cache(
     }
 
     const supabase = getSupabaseAdminClient();
-    const { data, error } = await supabase
-      .from("profile_settings")
-      .select("*")
-      .eq("id", "default")
-      .maybeSingle();
+    const { data, error } = await withQueryTimeout(
+      supabase.from("profile_settings").select("*").eq("id", "default").maybeSingle(),
+      "profile settings query",
+    );
 
     if (error || !data) {
       if (error) {
@@ -215,10 +237,13 @@ const getCachedExperience = unstable_cache(
     }
 
     const supabase = getSupabaseAdminClient();
-    const { data, error } = await supabase
-      .from("experience_entries")
-      .select("id, period, role, company, summary, highlights, sort_order")
-      .order("sort_order", { ascending: true });
+    const { data, error } = await withQueryTimeout(
+      supabase
+        .from("experience_entries")
+        .select("id, period, role, company, summary, highlights, sort_order")
+        .order("sort_order", { ascending: true }),
+      "experience query",
+    );
 
     if (error || !data || data.length === 0) {
       if (error) {
@@ -255,10 +280,13 @@ const getCachedSocialLinks = unstable_cache(
     }
 
     const supabase = getSupabaseAdminClient();
-    const { data, error } = await supabase
-      .from("social_links")
-      .select("id, label, href, sort_order")
-      .order("sort_order", { ascending: true });
+    const { data, error } = await withQueryTimeout(
+      supabase
+        .from("social_links")
+        .select("id, label, href, sort_order")
+        .order("sort_order", { ascending: true }),
+      "social links query",
+    );
 
     if (error || !data || data.length === 0) {
       if (error) {
@@ -292,10 +320,13 @@ const getCachedToolBadges = unstable_cache(
     }
 
     const supabase = getSupabaseAdminClient();
-    const { data, error } = await supabase
-      .from("tool_badges")
-      .select("id, name, sort_order")
-      .order("sort_order", { ascending: true });
+    const { data, error } = await withQueryTimeout(
+      supabase
+        .from("tool_badges")
+        .select("id, name, sort_order")
+        .order("sort_order", { ascending: true }),
+      "tool badges query",
+    );
 
     if (error || !data || data.length === 0) {
       if (error) {
@@ -328,10 +359,13 @@ const getCachedResumes = unstable_cache(
     }
 
     const supabase = getSupabaseAdminClient();
-    const { data, error } = await supabase
-      .from("resume_assets")
-      .select("id, title, summary, file_url, file_name, is_active, sort_order")
-      .order("sort_order", { ascending: true });
+    const { data, error } = await withQueryTimeout(
+      supabase
+        .from("resume_assets")
+        .select("id, title, summary, file_url, file_name, is_active, sort_order")
+        .order("sort_order", { ascending: true }),
+      "resume assets query",
+    );
 
     if (error || !data || data.length === 0) {
       if (error) {

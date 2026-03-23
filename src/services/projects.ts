@@ -126,10 +126,34 @@ const PROJECTS: ProjectRecord[] = [
 ];
 
 const PROJECTS_CACHE_TTL_MS = 60_000;
+const PROJECTS_QUERY_TIMEOUT_MS = 2500;
 
 let inMemoryProjectsCache: ProjectRecord[] | null = null;
 let inMemoryProjectsCacheExpiresAt = 0;
 let inFlightProjectsRefresh: Promise<ProjectRecord[]> | null = null;
+
+async function withProjectsTimeout<T>(query: T): Promise<Awaited<T>> {
+  let timeoutHandle: ReturnType<typeof setTimeout> | undefined;
+
+  try {
+    return (await Promise.race([
+      Promise.resolve(query),
+      new Promise<never>((_, reject) => {
+        timeoutHandle = setTimeout(() => {
+          reject(
+            new Error(
+              `projects query timed out after ${PROJECTS_QUERY_TIMEOUT_MS}ms`,
+            ),
+          );
+        }, PROJECTS_QUERY_TIMEOUT_MS);
+      }),
+    ])) as Awaited<T>;
+  } finally {
+    if (timeoutHandle) {
+      clearTimeout(timeoutHandle);
+    }
+  }
+}
 
 const getCachedSupabaseProjects = unstable_cache(
   async () => {
@@ -138,12 +162,14 @@ const getCachedSupabaseProjects = unstable_cache(
     }
 
     try {
-      const { data, error } = await getSupabaseAdminClient()
-        .from("projects")
-        .select(
-          "id, title, slug, category, tech_stack, version, status, summary, thumbnail_src, repo_url, live_url, featured, sort_order",
-        )
-        .order("sort_order", { ascending: true, nullsFirst: false });
+      const { data, error } = await withProjectsTimeout(
+        getSupabaseAdminClient()
+          .from("projects")
+          .select(
+            "id, title, slug, category, tech_stack, version, status, summary, thumbnail_src, repo_url, live_url, featured, sort_order",
+          )
+          .order("sort_order", { ascending: true, nullsFirst: false }),
+      );
 
       if (error) {
         throw error;

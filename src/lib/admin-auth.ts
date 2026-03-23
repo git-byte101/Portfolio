@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 const ADMIN_TOKEN_HEADER = "x-admin-token";
+export const ADMIN_SESSION_COOKIE = "admin_session";
 
 function parseBearerToken(value: string | null): string {
   if (!value) {
@@ -13,6 +14,34 @@ function parseBearerToken(value: string | null): string {
   }
 
   return token?.trim() ?? "";
+}
+
+function parseCookieToken(cookieHeader: string | null): string {
+  if (!cookieHeader) {
+    return "";
+  }
+
+  const pairs = cookieHeader.split(";");
+  for (const pair of pairs) {
+    const [rawName, ...rest] = pair.split("=");
+    if (!rawName) {
+      continue;
+    }
+
+    const name = rawName.trim();
+    if (name !== ADMIN_SESSION_COOKIE) {
+      continue;
+    }
+
+    return decodeURIComponent(rest.join("=").trim());
+  }
+
+  return "";
+}
+
+export function isValidAdminToken(token: string): boolean {
+  const expectedToken = process.env.ADMIN_API_TOKEN?.trim() ?? "";
+  return Boolean(expectedToken) && token === expectedToken;
 }
 
 export function requireAdmin(request: Request): NextResponse | null {
@@ -30,7 +59,8 @@ export function requireAdmin(request: Request): NextResponse | null {
 
   const headerToken = request.headers.get(ADMIN_TOKEN_HEADER)?.trim() ?? "";
   const bearerToken = parseBearerToken(request.headers.get("authorization"));
-  const providedToken = headerToken || bearerToken;
+  const cookieToken = parseCookieToken(request.headers.get("cookie"));
+  const providedToken = headerToken || bearerToken || cookieToken;
 
   if (providedToken !== expectedToken) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

@@ -92,6 +92,13 @@ Available resources:
 - `GET/POST /api/admin/resumes`
 - `GET/PATCH/DELETE /api/admin/resumes/:id`
 
+## Private Content Console
+
+- Owner-only interface route: `/admin`
+- Login route: `/admin/login`
+- Access token: `ADMIN_API_TOKEN`
+- Session model: token is exchanged for an httpOnly session cookie and middleware protects `/admin/*` routes.
+
 ## Build And Lint
 
 ```bash

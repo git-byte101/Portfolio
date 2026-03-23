@@ -1,6 +1,6 @@
 import { getActiveResume } from "@/services/site-content";
 
-export const revalidate = 60;
+export const revalidate = 0;
 
 export default async function ResumePage() {
   const resume = await getActiveResume();

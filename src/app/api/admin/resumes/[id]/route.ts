@@ -88,6 +88,17 @@ export async function PATCH(request: Request, context: Params) {
     return jsonError("Resume record not found", 404);
   }
 
+  if (updateInput.is_active === true) {
+    const { error: deactivateError } = await supabaseAdmin()
+      .from("resume_assets")
+      .update({ is_active: false })
+      .neq("id", id);
+
+    if (deactivateError) {
+      return jsonError(deactivateError.message, 500);
+    }
+  }
+
   revalidateTags(["resume-assets"]);
   return NextResponse.json({ data });
 }

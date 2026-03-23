@@ -61,6 +61,17 @@ export async function POST(request: Request) {
       return jsonError(error.message, 500);
     }
 
+    if (data?.id && entry.is_active) {
+      const { error: deactivateError } = await supabaseAdmin()
+        .from("resume_assets")
+        .update({ is_active: false })
+        .neq("id", data.id);
+
+      if (deactivateError) {
+        return jsonError(deactivateError.message, 500);
+      }
+    }
+
     revalidateTags(["resume-assets"]);
     return NextResponse.json({ data }, { status: 201 });
   } catch (error) {

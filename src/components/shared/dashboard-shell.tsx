@@ -2,8 +2,8 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import { AnimatePresence, LayoutGroup, motion } from "motion/react";
+import { usePathname } from "next/navigation";
+import { LayoutGroup } from "motion/react";
 import { useEffect, useState } from "react";
 
 interface DashboardShellProps {
@@ -44,28 +44,19 @@ export function DashboardShell({
   resumeFileName,
 }: DashboardShellProps) {
   const pathname = usePathname();
-  const router = useRouter();
-  const [theme, setTheme] = useState<"oak" | "slate">(() => {
-    if (typeof window === "undefined") {
-      return "oak";
-    }
+  const [theme, setTheme] = useState<"oak" | "slate">("oak");
 
+  useEffect(() => {
     const persistedTheme = window.localStorage.getItem("portfolio-theme");
-    return persistedTheme === "slate" ? "slate" : "oak";
-  });
+    if (persistedTheme === "slate") {
+      setTheme("slate");
+    }
+  }, []);
 
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
     window.localStorage.setItem("portfolio-theme", theme);
   }, [theme]);
-
-  useEffect(() => {
-    for (const item of navItems) {
-      if (item.href !== pathname) {
-        router.prefetch(item.href);
-      }
-    }
-  }, [pathname, router]);
 
   const renderNavItem = ({
     item,
@@ -88,18 +79,12 @@ export function DashboardShell({
         aria-current={isActive ? "page" : undefined}
       >
         {isActive ? (
-          <motion.span
-            layoutId={isMobile ? "mobile-active-nav" : "active-nav-indicator"}
+          <span
             className={
               isMobile
                 ? "absolute inset-0 rounded-lg bg-oak-primary/12"
                 : "sidebar-active-rail absolute inset-y-2 left-0 w-1 rounded-full bg-oak-primary"
             }
-            transition={{
-              type: "spring",
-              stiffness: isMobile ? 340 : 360,
-              damping: 30,
-            }}
           />
         ) : null}
         <span
@@ -213,17 +198,7 @@ export function DashboardShell({
           </nav>
 
           <main className="oak-card min-h-0 flex-1 overflow-y-auto p-4 md:p-6">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={pathname}
-                initial={{ opacity: 0, y: 12, filter: "blur(4px)" }}
-                animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-                exit={{ opacity: 0, y: -8, filter: "blur(3px)" }}
-                transition={{ duration: 0.24, ease: "easeOut" }}
-              >
-                {children}
-              </motion.div>
-            </AnimatePresence>
+            <div key={pathname}>{children}</div>
           </main>
         </div>
       </div>

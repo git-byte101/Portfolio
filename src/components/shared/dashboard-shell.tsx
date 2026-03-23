@@ -44,14 +44,14 @@ export function DashboardShell({
   resumeFileName,
 }: DashboardShellProps) {
   const pathname = usePathname();
-  const [theme, setTheme] = useState<"oak" | "slate">("oak");
-
-  useEffect(() => {
-    const persistedTheme = window.localStorage.getItem("portfolio-theme");
-    if (persistedTheme === "slate") {
-      setTheme("slate");
+  const [theme, setTheme] = useState<"oak" | "slate">(() => {
+    if (typeof window === "undefined") {
+      return "oak";
     }
-  }, []);
+
+    const persistedTheme = window.localStorage.getItem("portfolio-theme");
+    return persistedTheme === "slate" ? "slate" : "oak";
+  });
 
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);

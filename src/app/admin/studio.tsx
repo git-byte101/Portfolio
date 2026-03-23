@@ -417,6 +417,8 @@ export function ContentStudio() {
   }
 
   useEffect(() => {
+    // Initial one-time bootstrap for the studio dashboard.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     void refreshAll();
   }, []);
 

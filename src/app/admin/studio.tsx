@@ -222,7 +222,10 @@ export function ContentStudio() {
 
   async function refreshProjects() {
     const response = await fetch("/api/admin/projects", { cache: "no-store" });
-    const payload = await parseResponse<{ data?: ProjectItem[]; error?: string }>(response);
+    const payload = await parseResponse<{
+      data?: ProjectItem[];
+      error?: string;
+    }>(response);
     if (!response.ok) {
       throw new Error(payload.error ?? "Unable to load projects.");
     }
@@ -230,8 +233,13 @@ export function ContentStudio() {
   }
 
   async function refreshExperience() {
-    const response = await fetch("/api/admin/experience", { cache: "no-store" });
-    const payload = await parseResponse<{ data?: ExperienceItem[]; error?: string }>(response);
+    const response = await fetch("/api/admin/experience", {
+      cache: "no-store",
+    });
+    const payload = await parseResponse<{
+      data?: ExperienceItem[];
+      error?: string;
+    }>(response);
     if (!response.ok) {
       throw new Error(payload.error ?? "Unable to load experience.");
     }
@@ -239,8 +247,13 @@ export function ContentStudio() {
   }
 
   async function refreshSocial() {
-    const response = await fetch("/api/admin/social-links", { cache: "no-store" });
-    const payload = await parseResponse<{ data?: SocialItem[]; error?: string }>(response);
+    const response = await fetch("/api/admin/social-links", {
+      cache: "no-store",
+    });
+    const payload = await parseResponse<{
+      data?: SocialItem[];
+      error?: string;
+    }>(response);
     if (!response.ok) {
       throw new Error(payload.error ?? "Unable to load social links.");
     }
@@ -248,8 +261,12 @@ export function ContentStudio() {
   }
 
   async function refreshTools() {
-    const response = await fetch("/api/admin/tool-badges", { cache: "no-store" });
-    const payload = await parseResponse<{ data?: ToolItem[]; error?: string }>(response);
+    const response = await fetch("/api/admin/tool-badges", {
+      cache: "no-store",
+    });
+    const payload = await parseResponse<{ data?: ToolItem[]; error?: string }>(
+      response,
+    );
     if (!response.ok) {
       throw new Error(payload.error ?? "Unable to load tool badges.");
     }
@@ -258,7 +275,10 @@ export function ContentStudio() {
 
   async function refreshResumes() {
     const response = await fetch("/api/admin/resumes", { cache: "no-store" });
-    const payload = await parseResponse<{ data?: ResumeItem[]; error?: string }>(response);
+    const payload = await parseResponse<{
+      data?: ResumeItem[];
+      error?: string;
+    }>(response);
     if (!response.ok) {
       throw new Error(payload.error ?? "Unable to load resumes.");
     }
@@ -267,7 +287,10 @@ export function ContentStudio() {
 
   async function refreshProfile() {
     const response = await fetch("/api/admin/profile", { cache: "no-store" });
-    const payload = await parseResponse<{ data?: ProfileSettings; error?: string }>(response);
+    const payload = await parseResponse<{
+      data?: ProfileSettings;
+      error?: string;
+    }>(response);
     if (!response.ok) {
       throw new Error(payload.error ?? "Unable to load profile settings.");
     }
@@ -386,7 +409,9 @@ export function ContentStudio() {
   async function removeProject(id: string) {
     setBusy(true);
     setStatus("Deleting project...");
-    const response = await fetch(`/api/admin/projects/${id}`, { method: "DELETE" });
+    const response = await fetch(`/api/admin/projects/${id}`, {
+      method: "DELETE",
+    });
     if (!response.ok) {
       setBusy(false);
       setStatus("Project delete failed.");
@@ -451,7 +476,9 @@ export function ContentStudio() {
   async function removeExperience(id: string) {
     setBusy(true);
     setStatus("Deleting experience...");
-    const response = await fetch(`/api/admin/experience/${id}`, { method: "DELETE" });
+    const response = await fetch(`/api/admin/experience/${id}`, {
+      method: "DELETE",
+    });
     if (!response.ok) {
       setBusy(false);
       setStatus("Experience delete failed.");
@@ -511,7 +538,9 @@ export function ContentStudio() {
   async function removeSocial(id: string) {
     setBusy(true);
     setStatus("Deleting social link...");
-    const response = await fetch(`/api/admin/social-links/${id}`, { method: "DELETE" });
+    const response = await fetch(`/api/admin/social-links/${id}`, {
+      method: "DELETE",
+    });
     if (!response.ok) {
       setBusy(false);
       setStatus("Social link delete failed.");
@@ -569,7 +598,9 @@ export function ContentStudio() {
   async function removeTool(id: string) {
     setBusy(true);
     setStatus("Deleting tool badge...");
-    const response = await fetch(`/api/admin/tool-badges/${id}`, { method: "DELETE" });
+    const response = await fetch(`/api/admin/tool-badges/${id}`, {
+      method: "DELETE",
+    });
     if (!response.ok) {
       setBusy(false);
       setStatus("Tool badge delete failed.");
@@ -635,7 +666,9 @@ export function ContentStudio() {
   async function removeResume(id: string) {
     setBusy(true);
     setStatus("Deleting resume...");
-    const response = await fetch(`/api/admin/resumes/${id}`, { method: "DELETE" });
+    const response = await fetch(`/api/admin/resumes/${id}`, {
+      method: "DELETE",
+    });
     if (!response.ok) {
       setBusy(false);
       setStatus("Resume delete failed.");
@@ -765,57 +798,211 @@ export function ContentStudio() {
                       key={item.id}
                       className="rounded-lg border border-oak-primary/20 bg-white px-3 py-2"
                     >
-                      <p className="text-sm font-semibold text-oak-text">{item.title}</p>
-                      <p className="text-xs text-oak-muted">{item.category} · {item.status}</p>
+                      <p className="text-sm font-semibold text-oak-text">
+                        {item.title}
+                      </p>
+                      <p className="text-xs text-oak-muted">
+                        {item.category} · {item.status}
+                      </p>
                       <div className="mt-2 flex gap-2">
-                        <button type="button" onClick={() => pickProject(item)} className="rounded-md border border-oak-primary/30 px-2 py-1 text-xs font-semibold text-oak-text">Edit</button>
-                        <button type="button" onClick={() => void removeProject(item.id)} className="rounded-md border border-red-300 px-2 py-1 text-xs font-semibold text-red-700">Delete</button>
+                        <button
+                          type="button"
+                          onClick={() => pickProject(item)}
+                          className="rounded-md border border-oak-primary/30 px-2 py-1 text-xs font-semibold text-oak-text"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => void removeProject(item.id)}
+                          className="rounded-md border border-red-300 px-2 py-1 text-xs font-semibold text-red-700"
+                        >
+                          Delete
+                        </button>
                       </div>
                     </div>
                   ))
                 )}
               </div>
               <div className="grid gap-2">
-                <label className="text-xs font-semibold uppercase tracking-[0.12em] text-oak-muted">Title</label>
-                <input value={projectForm.title} onChange={(event) => setProjectForm((prev) => ({ ...prev, title: event.target.value }))} className="rounded-lg border border-oak-primary/25 bg-white px-3 py-2 text-sm" />
-                <label className="text-xs font-semibold uppercase tracking-[0.12em] text-oak-muted">Summary</label>
-                <textarea value={projectForm.summary} onChange={(event) => setProjectForm((prev) => ({ ...prev, summary: event.target.value }))} className="h-24 rounded-lg border border-oak-primary/25 bg-white px-3 py-2 text-sm" />
+                <label className="text-xs font-semibold uppercase tracking-[0.12em] text-oak-muted">
+                  Title
+                </label>
+                <input
+                  value={projectForm.title}
+                  onChange={(event) =>
+                    setProjectForm((prev) => ({
+                      ...prev,
+                      title: event.target.value,
+                    }))
+                  }
+                  className="rounded-lg border border-oak-primary/25 bg-white px-3 py-2 text-sm"
+                />
+                <label className="text-xs font-semibold uppercase tracking-[0.12em] text-oak-muted">
+                  Summary
+                </label>
+                <textarea
+                  value={projectForm.summary}
+                  onChange={(event) =>
+                    setProjectForm((prev) => ({
+                      ...prev,
+                      summary: event.target.value,
+                    }))
+                  }
+                  className="h-24 rounded-lg border border-oak-primary/25 bg-white px-3 py-2 text-sm"
+                />
                 <div className="grid gap-2 sm:grid-cols-2">
                   <div>
-                    <label className="text-xs font-semibold uppercase tracking-[0.12em] text-oak-muted">Category</label>
-                    <select value={projectForm.category} onChange={(event) => setProjectForm((prev) => ({ ...prev, category: event.target.value as ProjectCategory }))} className="mt-1 w-full rounded-lg border border-oak-primary/25 bg-white px-3 py-2 text-sm">
+                    <label className="text-xs font-semibold uppercase tracking-[0.12em] text-oak-muted">
+                      Category
+                    </label>
+                    <select
+                      value={projectForm.category}
+                      onChange={(event) =>
+                        setProjectForm((prev) => ({
+                          ...prev,
+                          category: event.target.value as ProjectCategory,
+                        }))
+                      }
+                      className="mt-1 w-full rounded-lg border border-oak-primary/25 bg-white px-3 py-2 text-sm"
+                    >
                       <option>Programming</option>
                       <option>AI Automation</option>
                       <option>NoSQL</option>
                     </select>
                   </div>
                   <div>
-                    <label className="text-xs font-semibold uppercase tracking-[0.12em] text-oak-muted">Status</label>
-                    <select value={projectForm.status} onChange={(event) => setProjectForm((prev) => ({ ...prev, status: event.target.value as ProjectStatus }))} className="mt-1 w-full rounded-lg border border-oak-primary/25 bg-white px-3 py-2 text-sm">
+                    <label className="text-xs font-semibold uppercase tracking-[0.12em] text-oak-muted">
+                      Status
+                    </label>
+                    <select
+                      value={projectForm.status}
+                      onChange={(event) =>
+                        setProjectForm((prev) => ({
+                          ...prev,
+                          status: event.target.value as ProjectStatus,
+                        }))
+                      }
+                      className="mt-1 w-full rounded-lg border border-oak-primary/25 bg-white px-3 py-2 text-sm"
+                    >
                       <option>Production</option>
                       <option>Scaling</option>
                       <option>R&D</option>
                     </select>
                   </div>
                 </div>
-                <label className="text-xs font-semibold uppercase tracking-[0.12em] text-oak-muted">Tech Stack (comma-separated)</label>
-                <input value={projectForm.techStack} onChange={(event) => setProjectForm((prev) => ({ ...prev, techStack: event.target.value }))} className="rounded-lg border border-oak-primary/25 bg-white px-3 py-2 text-sm" />
+                <label className="text-xs font-semibold uppercase tracking-[0.12em] text-oak-muted">
+                  Tech Stack (comma-separated)
+                </label>
+                <input
+                  value={projectForm.techStack}
+                  onChange={(event) =>
+                    setProjectForm((prev) => ({
+                      ...prev,
+                      techStack: event.target.value,
+                    }))
+                  }
+                  className="rounded-lg border border-oak-primary/25 bg-white px-3 py-2 text-sm"
+                />
                 <div className="grid gap-2 sm:grid-cols-2">
-                  <input value={projectForm.repoUrl} onChange={(event) => setProjectForm((prev) => ({ ...prev, repoUrl: event.target.value }))} className="rounded-lg border border-oak-primary/25 bg-white px-3 py-2 text-sm" placeholder="Repository URL" />
-                  <input value={projectForm.liveUrl} onChange={(event) => setProjectForm((prev) => ({ ...prev, liveUrl: event.target.value }))} className="rounded-lg border border-oak-primary/25 bg-white px-3 py-2 text-sm" placeholder="Live URL" />
+                  <input
+                    value={projectForm.repoUrl}
+                    onChange={(event) =>
+                      setProjectForm((prev) => ({
+                        ...prev,
+                        repoUrl: event.target.value,
+                      }))
+                    }
+                    className="rounded-lg border border-oak-primary/25 bg-white px-3 py-2 text-sm"
+                    placeholder="Repository URL"
+                  />
+                  <input
+                    value={projectForm.liveUrl}
+                    onChange={(event) =>
+                      setProjectForm((prev) => ({
+                        ...prev,
+                        liveUrl: event.target.value,
+                      }))
+                    }
+                    className="rounded-lg border border-oak-primary/25 bg-white px-3 py-2 text-sm"
+                    placeholder="Live URL"
+                  />
                 </div>
                 <div className="grid gap-2 sm:grid-cols-3">
-                  <input value={projectForm.slug} onChange={(event) => setProjectForm((prev) => ({ ...prev, slug: event.target.value }))} className="rounded-lg border border-oak-primary/25 bg-white px-3 py-2 text-sm" placeholder="Slug" />
-                  <input value={projectForm.version} onChange={(event) => setProjectForm((prev) => ({ ...prev, version: event.target.value }))} className="rounded-lg border border-oak-primary/25 bg-white px-3 py-2 text-sm" placeholder="Version" />
-                  <input value={projectForm.sortOrder} onChange={(event) => setProjectForm((prev) => ({ ...prev, sortOrder: event.target.value }))} className="rounded-lg border border-oak-primary/25 bg-white px-3 py-2 text-sm" placeholder="Sort order" />
+                  <input
+                    value={projectForm.slug}
+                    onChange={(event) =>
+                      setProjectForm((prev) => ({
+                        ...prev,
+                        slug: event.target.value,
+                      }))
+                    }
+                    className="rounded-lg border border-oak-primary/25 bg-white px-3 py-2 text-sm"
+                    placeholder="Slug"
+                  />
+                  <input
+                    value={projectForm.version}
+                    onChange={(event) =>
+                      setProjectForm((prev) => ({
+                        ...prev,
+                        version: event.target.value,
+                      }))
+                    }
+                    className="rounded-lg border border-oak-primary/25 bg-white px-3 py-2 text-sm"
+                    placeholder="Version"
+                  />
+                  <input
+                    value={projectForm.sortOrder}
+                    onChange={(event) =>
+                      setProjectForm((prev) => ({
+                        ...prev,
+                        sortOrder: event.target.value,
+                      }))
+                    }
+                    className="rounded-lg border border-oak-primary/25 bg-white px-3 py-2 text-sm"
+                    placeholder="Sort order"
+                  />
                 </div>
-                <input value={projectForm.thumbnailSrc} onChange={(event) => setProjectForm((prev) => ({ ...prev, thumbnailSrc: event.target.value }))} className="rounded-lg border border-oak-primary/25 bg-white px-3 py-2 text-sm" placeholder="Thumbnail URL" />
+                <input
+                  value={projectForm.thumbnailSrc}
+                  onChange={(event) =>
+                    setProjectForm((prev) => ({
+                      ...prev,
+                      thumbnailSrc: event.target.value,
+                    }))
+                  }
+                  className="rounded-lg border border-oak-primary/25 bg-white px-3 py-2 text-sm"
+                  placeholder="Thumbnail URL"
+                />
                 <label className="mt-1 inline-flex items-center gap-2 text-sm text-oak-text">
-                  <input type="checkbox" checked={projectForm.featured} onChange={(event) => setProjectForm((prev) => ({ ...prev, featured: event.target.checked }))} /> Featured project
+                  <input
+                    type="checkbox"
+                    checked={projectForm.featured}
+                    onChange={(event) =>
+                      setProjectForm((prev) => ({
+                        ...prev,
+                        featured: event.target.checked,
+                      }))
+                    }
+                  />{" "}
+                  Featured project
                 </label>
                 <div className="mt-2 flex gap-2">
-                  <button type="button" onClick={() => void saveProject()} className="rounded-lg bg-oak-primary px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-white" disabled={busy}>{projectForm.id ? "Update" : "Create"}</button>
-                  <button type="button" onClick={() => setProjectForm(blankProject)} className="rounded-lg border border-oak-primary/30 px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-oak-text">Clear</button>
+                  <button
+                    type="button"
+                    onClick={() => void saveProject()}
+                    className="rounded-lg bg-oak-primary px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-white"
+                    disabled={busy}
+                  >
+                    {projectForm.id ? "Update" : "Create"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setProjectForm(blankProject)}
+                    className="rounded-lg border border-oak-primary/30 px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-oak-text"
+                  >
+                    Clear
+                  </button>
                 </div>
               </div>
             </div>
@@ -824,27 +1011,121 @@ export function ContentStudio() {
           {activePanel === "experience" ? (
             <div className="mt-4 grid gap-4 xl:grid-cols-[1.1fr_1fr]">
               <div className="max-h-96 space-y-2 overflow-auto rounded-xl border border-oak-primary/20 bg-white/75 p-2">
-                {experienceItems.length === 0 ? <p className="p-2 text-sm text-oak-muted">No entries yet.</p> : experienceItems.map((item) => (
-                  <div key={item.id} className="rounded-lg border border-oak-primary/20 bg-white px-3 py-2">
-                    <p className="text-sm font-semibold text-oak-text">{item.role} · {item.company}</p>
-                    <p className="text-xs text-oak-muted">{item.period}</p>
-                    <div className="mt-2 flex gap-2">
-                      <button type="button" onClick={() => pickExperience(item)} className="rounded-md border border-oak-primary/30 px-2 py-1 text-xs font-semibold text-oak-text">Edit</button>
-                      <button type="button" onClick={() => void removeExperience(item.id)} className="rounded-md border border-red-300 px-2 py-1 text-xs font-semibold text-red-700">Delete</button>
+                {experienceItems.length === 0 ? (
+                  <p className="p-2 text-sm text-oak-muted">No entries yet.</p>
+                ) : (
+                  experienceItems.map((item) => (
+                    <div
+                      key={item.id}
+                      className="rounded-lg border border-oak-primary/20 bg-white px-3 py-2"
+                    >
+                      <p className="text-sm font-semibold text-oak-text">
+                        {item.role} · {item.company}
+                      </p>
+                      <p className="text-xs text-oak-muted">{item.period}</p>
+                      <div className="mt-2 flex gap-2">
+                        <button
+                          type="button"
+                          onClick={() => pickExperience(item)}
+                          className="rounded-md border border-oak-primary/30 px-2 py-1 text-xs font-semibold text-oak-text"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => void removeExperience(item.id)}
+                          className="rounded-md border border-red-300 px-2 py-1 text-xs font-semibold text-red-700"
+                        >
+                          Delete
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))
+                )}
               </div>
               <div className="grid gap-2">
-                <input value={experienceForm.period} onChange={(event) => setExperienceForm((prev) => ({ ...prev, period: event.target.value }))} className="rounded-lg border border-oak-primary/25 bg-white px-3 py-2 text-sm" placeholder="Period" />
-                <input value={experienceForm.role} onChange={(event) => setExperienceForm((prev) => ({ ...prev, role: event.target.value }))} className="rounded-lg border border-oak-primary/25 bg-white px-3 py-2 text-sm" placeholder="Role" />
-                <input value={experienceForm.company} onChange={(event) => setExperienceForm((prev) => ({ ...prev, company: event.target.value }))} className="rounded-lg border border-oak-primary/25 bg-white px-3 py-2 text-sm" placeholder="Company" />
-                <textarea value={experienceForm.summary} onChange={(event) => setExperienceForm((prev) => ({ ...prev, summary: event.target.value }))} className="h-24 rounded-lg border border-oak-primary/25 bg-white px-3 py-2 text-sm" placeholder="Summary" />
-                <textarea value={experienceForm.highlightsText} onChange={(event) => setExperienceForm((prev) => ({ ...prev, highlightsText: event.target.value }))} className="h-24 rounded-lg border border-oak-primary/25 bg-white px-3 py-2 text-sm" placeholder="Highlights (one per line)" />
-                <input value={experienceForm.sortOrder} onChange={(event) => setExperienceForm((prev) => ({ ...prev, sortOrder: event.target.value }))} className="rounded-lg border border-oak-primary/25 bg-white px-3 py-2 text-sm" placeholder="Sort order" />
+                <input
+                  value={experienceForm.period}
+                  onChange={(event) =>
+                    setExperienceForm((prev) => ({
+                      ...prev,
+                      period: event.target.value,
+                    }))
+                  }
+                  className="rounded-lg border border-oak-primary/25 bg-white px-3 py-2 text-sm"
+                  placeholder="Period"
+                />
+                <input
+                  value={experienceForm.role}
+                  onChange={(event) =>
+                    setExperienceForm((prev) => ({
+                      ...prev,
+                      role: event.target.value,
+                    }))
+                  }
+                  className="rounded-lg border border-oak-primary/25 bg-white px-3 py-2 text-sm"
+                  placeholder="Role"
+                />
+                <input
+                  value={experienceForm.company}
+                  onChange={(event) =>
+                    setExperienceForm((prev) => ({
+                      ...prev,
+                      company: event.target.value,
+                    }))
+                  }
+                  className="rounded-lg border border-oak-primary/25 bg-white px-3 py-2 text-sm"
+                  placeholder="Company"
+                />
+                <textarea
+                  value={experienceForm.summary}
+                  onChange={(event) =>
+                    setExperienceForm((prev) => ({
+                      ...prev,
+                      summary: event.target.value,
+                    }))
+                  }
+                  className="h-24 rounded-lg border border-oak-primary/25 bg-white px-3 py-2 text-sm"
+                  placeholder="Summary"
+                />
+                <textarea
+                  value={experienceForm.highlightsText}
+                  onChange={(event) =>
+                    setExperienceForm((prev) => ({
+                      ...prev,
+                      highlightsText: event.target.value,
+                    }))
+                  }
+                  className="h-24 rounded-lg border border-oak-primary/25 bg-white px-3 py-2 text-sm"
+                  placeholder="Highlights (one per line)"
+                />
+                <input
+                  value={experienceForm.sortOrder}
+                  onChange={(event) =>
+                    setExperienceForm((prev) => ({
+                      ...prev,
+                      sortOrder: event.target.value,
+                    }))
+                  }
+                  className="rounded-lg border border-oak-primary/25 bg-white px-3 py-2 text-sm"
+                  placeholder="Sort order"
+                />
                 <div className="mt-2 flex gap-2">
-                  <button type="button" onClick={() => void saveExperience()} className="rounded-lg bg-oak-primary px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-white" disabled={busy}>{experienceForm.id ? "Update" : "Create"}</button>
-                  <button type="button" onClick={() => setExperienceForm(blankExperience)} className="rounded-lg border border-oak-primary/30 px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-oak-text">Clear</button>
+                  <button
+                    type="button"
+                    onClick={() => void saveExperience()}
+                    className="rounded-lg bg-oak-primary px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-white"
+                    disabled={busy}
+                  >
+                    {experienceForm.id ? "Update" : "Create"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setExperienceForm(blankExperience)}
+                    className="rounded-lg border border-oak-primary/30 px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-oak-text"
+                  >
+                    Clear
+                  </button>
                 </div>
               </div>
             </div>
@@ -859,12 +1140,55 @@ export function ContentStudio() {
               onDelete={(id) => void removeSocial(id)}
               form={
                 <>
-                  <input value={socialForm.label} onChange={(event) => setSocialForm((prev) => ({ ...prev, label: event.target.value }))} className="rounded-lg border border-oak-primary/25 bg-white px-3 py-2 text-sm" placeholder="Label" />
-                  <input value={socialForm.href} onChange={(event) => setSocialForm((prev) => ({ ...prev, href: event.target.value }))} className="rounded-lg border border-oak-primary/25 bg-white px-3 py-2 text-sm" placeholder="https://..." />
-                  <input value={socialForm.sortOrder} onChange={(event) => setSocialForm((prev) => ({ ...prev, sortOrder: event.target.value }))} className="rounded-lg border border-oak-primary/25 bg-white px-3 py-2 text-sm" placeholder="Sort order" />
+                  <input
+                    value={socialForm.label}
+                    onChange={(event) =>
+                      setSocialForm((prev) => ({
+                        ...prev,
+                        label: event.target.value,
+                      }))
+                    }
+                    className="rounded-lg border border-oak-primary/25 bg-white px-3 py-2 text-sm"
+                    placeholder="Label"
+                  />
+                  <input
+                    value={socialForm.href}
+                    onChange={(event) =>
+                      setSocialForm((prev) => ({
+                        ...prev,
+                        href: event.target.value,
+                      }))
+                    }
+                    className="rounded-lg border border-oak-primary/25 bg-white px-3 py-2 text-sm"
+                    placeholder="https://..."
+                  />
+                  <input
+                    value={socialForm.sortOrder}
+                    onChange={(event) =>
+                      setSocialForm((prev) => ({
+                        ...prev,
+                        sortOrder: event.target.value,
+                      }))
+                    }
+                    className="rounded-lg border border-oak-primary/25 bg-white px-3 py-2 text-sm"
+                    placeholder="Sort order"
+                  />
                   <div className="mt-2 flex gap-2">
-                    <button type="button" onClick={() => void saveSocial()} className="rounded-lg bg-oak-primary px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-white" disabled={busy}>{socialForm.id ? "Update" : "Create"}</button>
-                    <button type="button" onClick={() => setSocialForm(blankSocial)} className="rounded-lg border border-oak-primary/30 px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-oak-text">Clear</button>
+                    <button
+                      type="button"
+                      onClick={() => void saveSocial()}
+                      className="rounded-lg bg-oak-primary px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-white"
+                      disabled={busy}
+                    >
+                      {socialForm.id ? "Update" : "Create"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSocialForm(blankSocial)}
+                      className="rounded-lg border border-oak-primary/30 px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-oak-text"
+                    >
+                      Clear
+                    </button>
                   </div>
                 </>
               }
@@ -880,11 +1204,44 @@ export function ContentStudio() {
               onDelete={(id) => void removeTool(id)}
               form={
                 <>
-                  <input value={toolForm.name} onChange={(event) => setToolForm((prev) => ({ ...prev, name: event.target.value }))} className="rounded-lg border border-oak-primary/25 bg-white px-3 py-2 text-sm" placeholder="Tool name" />
-                  <input value={toolForm.sortOrder} onChange={(event) => setToolForm((prev) => ({ ...prev, sortOrder: event.target.value }))} className="rounded-lg border border-oak-primary/25 bg-white px-3 py-2 text-sm" placeholder="Sort order" />
+                  <input
+                    value={toolForm.name}
+                    onChange={(event) =>
+                      setToolForm((prev) => ({
+                        ...prev,
+                        name: event.target.value,
+                      }))
+                    }
+                    className="rounded-lg border border-oak-primary/25 bg-white px-3 py-2 text-sm"
+                    placeholder="Tool name"
+                  />
+                  <input
+                    value={toolForm.sortOrder}
+                    onChange={(event) =>
+                      setToolForm((prev) => ({
+                        ...prev,
+                        sortOrder: event.target.value,
+                      }))
+                    }
+                    className="rounded-lg border border-oak-primary/25 bg-white px-3 py-2 text-sm"
+                    placeholder="Sort order"
+                  />
                   <div className="mt-2 flex gap-2">
-                    <button type="button" onClick={() => void saveTool()} className="rounded-lg bg-oak-primary px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-white" disabled={busy}>{toolForm.id ? "Update" : "Create"}</button>
-                    <button type="button" onClick={() => setToolForm(blankTool)} className="rounded-lg border border-oak-primary/30 px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-oak-text">Clear</button>
+                    <button
+                      type="button"
+                      onClick={() => void saveTool()}
+                      className="rounded-lg bg-oak-primary px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-white"
+                      disabled={busy}
+                    >
+                      {toolForm.id ? "Update" : "Create"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setToolForm(blankTool)}
+                      className="rounded-lg border border-oak-primary/30 px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-oak-text"
+                    >
+                      Clear
+                    </button>
                   </div>
                 </>
               }
@@ -900,19 +1257,92 @@ export function ContentStudio() {
               onDelete={(id) => void removeResume(id)}
               form={
                 <>
-                  <input value={resumeForm.title} onChange={(event) => setResumeForm((prev) => ({ ...prev, title: event.target.value }))} className="rounded-lg border border-oak-primary/25 bg-white px-3 py-2 text-sm" placeholder="Title" />
-                  <textarea value={resumeForm.summary} onChange={(event) => setResumeForm((prev) => ({ ...prev, summary: event.target.value }))} className="h-20 rounded-lg border border-oak-primary/25 bg-white px-3 py-2 text-sm" placeholder="Summary" />
-                  <input value={resumeForm.fileUrl} onChange={(event) => setResumeForm((prev) => ({ ...prev, fileUrl: event.target.value }))} className="rounded-lg border border-oak-primary/25 bg-white px-3 py-2 text-sm" placeholder="File URL" />
-                  <input value={resumeForm.fileName} onChange={(event) => setResumeForm((prev) => ({ ...prev, fileName: event.target.value }))} className="rounded-lg border border-oak-primary/25 bg-white px-3 py-2 text-sm" placeholder="File name" />
+                  <input
+                    value={resumeForm.title}
+                    onChange={(event) =>
+                      setResumeForm((prev) => ({
+                        ...prev,
+                        title: event.target.value,
+                      }))
+                    }
+                    className="rounded-lg border border-oak-primary/25 bg-white px-3 py-2 text-sm"
+                    placeholder="Title"
+                  />
+                  <textarea
+                    value={resumeForm.summary}
+                    onChange={(event) =>
+                      setResumeForm((prev) => ({
+                        ...prev,
+                        summary: event.target.value,
+                      }))
+                    }
+                    className="h-20 rounded-lg border border-oak-primary/25 bg-white px-3 py-2 text-sm"
+                    placeholder="Summary"
+                  />
+                  <input
+                    value={resumeForm.fileUrl}
+                    onChange={(event) =>
+                      setResumeForm((prev) => ({
+                        ...prev,
+                        fileUrl: event.target.value,
+                      }))
+                    }
+                    className="rounded-lg border border-oak-primary/25 bg-white px-3 py-2 text-sm"
+                    placeholder="File URL"
+                  />
+                  <input
+                    value={resumeForm.fileName}
+                    onChange={(event) =>
+                      setResumeForm((prev) => ({
+                        ...prev,
+                        fileName: event.target.value,
+                      }))
+                    }
+                    className="rounded-lg border border-oak-primary/25 bg-white px-3 py-2 text-sm"
+                    placeholder="File name"
+                  />
                   <div className="grid gap-2 sm:grid-cols-2">
-                    <input value={resumeForm.sortOrder} onChange={(event) => setResumeForm((prev) => ({ ...prev, sortOrder: event.target.value }))} className="rounded-lg border border-oak-primary/25 bg-white px-3 py-2 text-sm" placeholder="Sort order" />
+                    <input
+                      value={resumeForm.sortOrder}
+                      onChange={(event) =>
+                        setResumeForm((prev) => ({
+                          ...prev,
+                          sortOrder: event.target.value,
+                        }))
+                      }
+                      className="rounded-lg border border-oak-primary/25 bg-white px-3 py-2 text-sm"
+                      placeholder="Sort order"
+                    />
                     <label className="inline-flex items-center gap-2 rounded-lg border border-oak-primary/25 bg-white px-3 py-2 text-sm text-oak-text">
-                      <input type="checkbox" checked={resumeForm.isActive} onChange={(event) => setResumeForm((prev) => ({ ...prev, isActive: event.target.checked }))} /> Active resume
+                      <input
+                        type="checkbox"
+                        checked={resumeForm.isActive}
+                        onChange={(event) =>
+                          setResumeForm((prev) => ({
+                            ...prev,
+                            isActive: event.target.checked,
+                          }))
+                        }
+                      />{" "}
+                      Active resume
                     </label>
                   </div>
                   <div className="mt-2 flex gap-2">
-                    <button type="button" onClick={() => void saveResume()} className="rounded-lg bg-oak-primary px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-white" disabled={busy}>{resumeForm.id ? "Update" : "Create"}</button>
-                    <button type="button" onClick={() => setResumeForm(blankResume)} className="rounded-lg border border-oak-primary/30 px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-oak-text">Clear</button>
+                    <button
+                      type="button"
+                      onClick={() => void saveResume()}
+                      className="rounded-lg bg-oak-primary px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-white"
+                      disabled={busy}
+                    >
+                      {resumeForm.id ? "Update" : "Create"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setResumeForm(blankResume)}
+                      className="rounded-lg border border-oak-primary/30 px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-oak-text"
+                    >
+                      Clear
+                    </button>
                   </div>
                 </>
               }
@@ -921,27 +1351,204 @@ export function ContentStudio() {
 
           {activePanel === "profile" ? (
             <div className="mt-4 grid gap-2">
-              <input value={profileForm.name} onChange={(event) => setProfileForm((prev) => ({ ...prev, name: event.target.value }))} className="rounded-lg border border-oak-primary/25 bg-white px-3 py-2 text-sm" placeholder="Profile name" />
-              <input value={profileForm.dashboardTitle} onChange={(event) => setProfileForm((prev) => ({ ...prev, dashboardTitle: event.target.value }))} className="rounded-lg border border-oak-primary/25 bg-white px-3 py-2 text-sm" placeholder="Dashboard title" />
-              <input value={profileForm.dashboardSubtitle} onChange={(event) => setProfileForm((prev) => ({ ...prev, dashboardSubtitle: event.target.value }))} className="rounded-lg border border-oak-primary/25 bg-white px-3 py-2 text-sm" placeholder="Dashboard subtitle" />
-              <input value={profileForm.profilePhotoSrc} onChange={(event) => setProfileForm((prev) => ({ ...prev, profilePhotoSrc: event.target.value }))} className="rounded-lg border border-oak-primary/25 bg-white px-3 py-2 text-sm" placeholder="Profile photo URL" />
-              <textarea value={profileForm.sidebarFootnote} onChange={(event) => setProfileForm((prev) => ({ ...prev, sidebarFootnote: event.target.value }))} className="h-20 rounded-lg border border-oak-primary/25 bg-white px-3 py-2 text-sm" placeholder="Sidebar footnote" />
-              <textarea value={profileForm.overviewIntro} onChange={(event) => setProfileForm((prev) => ({ ...prev, overviewIntro: event.target.value }))} className="h-20 rounded-lg border border-oak-primary/25 bg-white px-3 py-2 text-sm" placeholder="Overview intro" />
-              <textarea value={profileForm.learnerIntro} onChange={(event) => setProfileForm((prev) => ({ ...prev, learnerIntro: event.target.value }))} className="h-20 rounded-lg border border-oak-primary/25 bg-white px-3 py-2 text-sm" placeholder="Learner intro" />
-              <input value={profileForm.overviewHeading} onChange={(event) => setProfileForm((prev) => ({ ...prev, overviewHeading: event.target.value }))} className="rounded-lg border border-oak-primary/25 bg-white px-3 py-2 text-sm" placeholder="Overview heading" />
-              <input value={profileForm.learnerHeading} onChange={(event) => setProfileForm((prev) => ({ ...prev, learnerHeading: event.target.value }))} className="rounded-lg border border-oak-primary/25 bg-white px-3 py-2 text-sm" placeholder="Learner heading" />
+              <input
+                value={profileForm.name}
+                onChange={(event) =>
+                  setProfileForm((prev) => ({
+                    ...prev,
+                    name: event.target.value,
+                  }))
+                }
+                className="rounded-lg border border-oak-primary/25 bg-white px-3 py-2 text-sm"
+                placeholder="Profile name"
+              />
+              <input
+                value={profileForm.dashboardTitle}
+                onChange={(event) =>
+                  setProfileForm((prev) => ({
+                    ...prev,
+                    dashboardTitle: event.target.value,
+                  }))
+                }
+                className="rounded-lg border border-oak-primary/25 bg-white px-3 py-2 text-sm"
+                placeholder="Dashboard title"
+              />
+              <input
+                value={profileForm.dashboardSubtitle}
+                onChange={(event) =>
+                  setProfileForm((prev) => ({
+                    ...prev,
+                    dashboardSubtitle: event.target.value,
+                  }))
+                }
+                className="rounded-lg border border-oak-primary/25 bg-white px-3 py-2 text-sm"
+                placeholder="Dashboard subtitle"
+              />
+              <input
+                value={profileForm.profilePhotoSrc}
+                onChange={(event) =>
+                  setProfileForm((prev) => ({
+                    ...prev,
+                    profilePhotoSrc: event.target.value,
+                  }))
+                }
+                className="rounded-lg border border-oak-primary/25 bg-white px-3 py-2 text-sm"
+                placeholder="Profile photo URL"
+              />
+              <textarea
+                value={profileForm.sidebarFootnote}
+                onChange={(event) =>
+                  setProfileForm((prev) => ({
+                    ...prev,
+                    sidebarFootnote: event.target.value,
+                  }))
+                }
+                className="h-20 rounded-lg border border-oak-primary/25 bg-white px-3 py-2 text-sm"
+                placeholder="Sidebar footnote"
+              />
+              <textarea
+                value={profileForm.overviewIntro}
+                onChange={(event) =>
+                  setProfileForm((prev) => ({
+                    ...prev,
+                    overviewIntro: event.target.value,
+                  }))
+                }
+                className="h-20 rounded-lg border border-oak-primary/25 bg-white px-3 py-2 text-sm"
+                placeholder="Overview intro"
+              />
+              <textarea
+                value={profileForm.learnerIntro}
+                onChange={(event) =>
+                  setProfileForm((prev) => ({
+                    ...prev,
+                    learnerIntro: event.target.value,
+                  }))
+                }
+                className="h-20 rounded-lg border border-oak-primary/25 bg-white px-3 py-2 text-sm"
+                placeholder="Learner intro"
+              />
+              <input
+                value={profileForm.overviewHeading}
+                onChange={(event) =>
+                  setProfileForm((prev) => ({
+                    ...prev,
+                    overviewHeading: event.target.value,
+                  }))
+                }
+                className="rounded-lg border border-oak-primary/25 bg-white px-3 py-2 text-sm"
+                placeholder="Overview heading"
+              />
+              <input
+                value={profileForm.learnerHeading}
+                onChange={(event) =>
+                  setProfileForm((prev) => ({
+                    ...prev,
+                    learnerHeading: event.target.value,
+                  }))
+                }
+                className="rounded-lg border border-oak-primary/25 bg-white px-3 py-2 text-sm"
+                placeholder="Learner heading"
+              />
               <div className="grid gap-2 sm:grid-cols-3">
-                <input value={profileForm.availabilityText} onChange={(event) => setProfileForm((prev) => ({ ...prev, availabilityText: event.target.value }))} className="rounded-lg border border-oak-primary/25 bg-white px-3 py-2 text-sm" placeholder="Availability text" />
-                <input value={profileForm.targetText} onChange={(event) => setProfileForm((prev) => ({ ...prev, targetText: event.target.value }))} className="rounded-lg border border-oak-primary/25 bg-white px-3 py-2 text-sm" placeholder="Target text" />
-                <input value={profileForm.workStyleText} onChange={(event) => setProfileForm((prev) => ({ ...prev, workStyleText: event.target.value }))} className="rounded-lg border border-oak-primary/25 bg-white px-3 py-2 text-sm" placeholder="Work style text" />
+                <input
+                  value={profileForm.availabilityText}
+                  onChange={(event) =>
+                    setProfileForm((prev) => ({
+                      ...prev,
+                      availabilityText: event.target.value,
+                    }))
+                  }
+                  className="rounded-lg border border-oak-primary/25 bg-white px-3 py-2 text-sm"
+                  placeholder="Availability text"
+                />
+                <input
+                  value={profileForm.targetText}
+                  onChange={(event) =>
+                    setProfileForm((prev) => ({
+                      ...prev,
+                      targetText: event.target.value,
+                    }))
+                  }
+                  className="rounded-lg border border-oak-primary/25 bg-white px-3 py-2 text-sm"
+                  placeholder="Target text"
+                />
+                <input
+                  value={profileForm.workStyleText}
+                  onChange={(event) =>
+                    setProfileForm((prev) => ({
+                      ...prev,
+                      workStyleText: event.target.value,
+                    }))
+                  }
+                  className="rounded-lg border border-oak-primary/25 bg-white px-3 py-2 text-sm"
+                  placeholder="Work style text"
+                />
               </div>
-              <textarea value={profileForm.foundationAreasText} onChange={(event) => setProfileForm((prev) => ({ ...prev, foundationAreasText: event.target.value }))} className="h-24 rounded-lg border border-oak-primary/25 bg-white px-3 py-2 text-sm" placeholder="Foundation areas (one per line)" />
-              <input value={profileForm.contactHeading} onChange={(event) => setProfileForm((prev) => ({ ...prev, contactHeading: event.target.value }))} className="rounded-lg border border-oak-primary/25 bg-white px-3 py-2 text-sm" placeholder="Contact heading" />
-              <textarea value={profileForm.contactIntro} onChange={(event) => setProfileForm((prev) => ({ ...prev, contactIntro: event.target.value }))} className="h-20 rounded-lg border border-oak-primary/25 bg-white px-3 py-2 text-sm" placeholder="Contact intro" />
-              <textarea value={profileForm.contactBio} onChange={(event) => setProfileForm((prev) => ({ ...prev, contactBio: event.target.value }))} className="h-24 rounded-lg border border-oak-primary/25 bg-white px-3 py-2 text-sm" placeholder="Contact bio" />
-              <textarea value={profileForm.contactHighlightsText} onChange={(event) => setProfileForm((prev) => ({ ...prev, contactHighlightsText: event.target.value }))} className="h-24 rounded-lg border border-oak-primary/25 bg-white px-3 py-2 text-sm" placeholder="Contact highlights (one per line)" />
+              <textarea
+                value={profileForm.foundationAreasText}
+                onChange={(event) =>
+                  setProfileForm((prev) => ({
+                    ...prev,
+                    foundationAreasText: event.target.value,
+                  }))
+                }
+                className="h-24 rounded-lg border border-oak-primary/25 bg-white px-3 py-2 text-sm"
+                placeholder="Foundation areas (one per line)"
+              />
+              <input
+                value={profileForm.contactHeading}
+                onChange={(event) =>
+                  setProfileForm((prev) => ({
+                    ...prev,
+                    contactHeading: event.target.value,
+                  }))
+                }
+                className="rounded-lg border border-oak-primary/25 bg-white px-3 py-2 text-sm"
+                placeholder="Contact heading"
+              />
+              <textarea
+                value={profileForm.contactIntro}
+                onChange={(event) =>
+                  setProfileForm((prev) => ({
+                    ...prev,
+                    contactIntro: event.target.value,
+                  }))
+                }
+                className="h-20 rounded-lg border border-oak-primary/25 bg-white px-3 py-2 text-sm"
+                placeholder="Contact intro"
+              />
+              <textarea
+                value={profileForm.contactBio}
+                onChange={(event) =>
+                  setProfileForm((prev) => ({
+                    ...prev,
+                    contactBio: event.target.value,
+                  }))
+                }
+                className="h-24 rounded-lg border border-oak-primary/25 bg-white px-3 py-2 text-sm"
+                placeholder="Contact bio"
+              />
+              <textarea
+                value={profileForm.contactHighlightsText}
+                onChange={(event) =>
+                  setProfileForm((prev) => ({
+                    ...prev,
+                    contactHighlightsText: event.target.value,
+                  }))
+                }
+                className="h-24 rounded-lg border border-oak-primary/25 bg-white px-3 py-2 text-sm"
+                placeholder="Contact highlights (one per line)"
+              />
               <div className="mt-2 flex gap-2">
-                <button type="button" onClick={() => void saveProfile()} className="rounded-lg bg-oak-primary px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-white" disabled={busy}>Save Profile</button>
+                <button
+                  type="button"
+                  onClick={() => void saveProfile()}
+                  className="rounded-lg bg-oak-primary px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-white"
+                  disabled={busy}
+                >
+                  Save Profile
+                </button>
               </div>
             </div>
           ) : null}

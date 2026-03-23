@@ -56,9 +56,13 @@ Open http://localhost:3000.
 Required:
 
 - `NEXT_PUBLIC_SUPABASE_URL`
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (Supabase may label this as the publishable key)
 - `SUPABASE_SERVICE_ROLE_KEY`
 - `ADMIN_API_TOKEN`
+
+Legacy compatibility:
+
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY` is still accepted in this codebase.
 
 ## Supabase Setup
 
@@ -123,7 +127,7 @@ Add these in GitHub: Settings -> Secrets and variables -> Actions -> New reposit
 Also add your app secrets for runtime usage in Vercel project settings:
 
 - `NEXT_PUBLIC_SUPABASE_URL`
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (or legacy `NEXT_PUBLIC_SUPABASE_ANON_KEY`)
 - `SUPABASE_SERVICE_ROLE_KEY`
 - `ADMIN_API_TOKEN`
 

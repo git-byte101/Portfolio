@@ -39,11 +39,15 @@ export function getSupabaseAdminClient(): SupabaseClient {
 
 export function getSupabaseAnonClient(): SupabaseClient {
   const supabaseUrl = getEnv("NEXT_PUBLIC_SUPABASE_URL");
-  const supabaseAnonKey = getEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY");
+  const supabasePublishableKey =
+    getEnv("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY") ||
+    getEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY");
 
-  if (!supabaseUrl || !supabaseAnonKey) {
-    throw new Error("Supabase anon configuration is missing.");
+  if (!supabaseUrl || !supabasePublishableKey) {
+    throw new Error(
+      "Supabase publishable key is missing. Set NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY (or NEXT_PUBLIC_SUPABASE_ANON_KEY for legacy projects).",
+    );
   }
 
-  return createClient(supabaseUrl, supabaseAnonKey);
+  return createClient(supabaseUrl, supabasePublishableKey);
 }

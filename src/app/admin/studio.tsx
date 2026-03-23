@@ -224,7 +224,10 @@ export function ContentStudio() {
 
     try {
       const parsed = JSON.parse(editBody) as Record<string, unknown>;
-      const endpoint = resource.key === "profile" ? resource.listPath : `${resource.listPath}/${selectedId}`;
+      const endpoint =
+        resource.key === "profile"
+          ? resource.listPath
+          : `${resource.listPath}/${selectedId}`;
       const method = resource.key === "profile" ? "PUT" : "PATCH";
       const response = await fetch(endpoint, {
         method,
@@ -325,7 +328,9 @@ export function ContentStudio() {
         <div className="grid gap-4">
           <article className="mecha-panel rounded-2xl border border-oak-primary/20 bg-oak-surface/80 p-4">
             <div className="flex items-center justify-between gap-3">
-              <h2 className="text-lg font-bold text-oak-text">{resource.label}</h2>
+              <h2 className="text-lg font-bold text-oak-text">
+                {resource.label}
+              </h2>
               <button
                 type="button"
                 onClick={() => void loadRecords()}
@@ -336,7 +341,9 @@ export function ContentStudio() {
             </div>
 
             <p className="mt-2 text-xs text-oak-muted">{status}</p>
-            {loading ? <p className="mt-2 text-sm text-oak-muted">Loading...</p> : null}
+            {loading ? (
+              <p className="mt-2 text-sm text-oak-muted">Loading...</p>
+            ) : null}
 
             <div className="mt-4 max-h-64 overflow-auto rounded-xl border border-oak-primary/20 bg-white/75 p-2">
               {records.length === 0 ? (
@@ -344,7 +351,8 @@ export function ContentStudio() {
               ) : (
                 <ul className="space-y-2">
                   {records.map((record) => {
-                    const idValue = (record.id as string | undefined) ?? "profile";
+                    const idValue =
+                      (record.id as string | undefined) ?? "profile";
                     const title =
                       (record.title as string | undefined) ??
                       (record.name as string | undefined) ??
@@ -368,7 +376,9 @@ export function ContentStudio() {
                           }`}
                         >
                           <p className="font-semibold text-oak-text">{title}</p>
-                          <p className="mt-1 text-xs text-oak-muted">{idValue}</p>
+                          <p className="mt-1 text-xs text-oak-muted">
+                            {idValue}
+                          </p>
                         </button>
                       </li>
                     );

@@ -46,7 +46,10 @@ export default function AdminLoginPage() {
       </p>
 
       <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
-        <label className="block text-sm font-semibold text-oak-text" htmlFor="admin-token">
+        <label
+          className="block text-sm font-semibold text-oak-text"
+          htmlFor="admin-token"
+        >
           Admin Token
         </label>
         <input

@@ -212,6 +212,7 @@ export function ContentStudio() {
 
   const [resumeItems, setResumeItems] = useState<ResumeItem[]>([]);
   const [resumeForm, setResumeForm] = useState(blankResume);
+  const [resumeFile, setResumeFile] = useState<File | null>(null);
 
   const [profileForm, setProfileForm] = useState(blankProfile);
 
@@ -625,16 +626,66 @@ export function ContentStudio() {
       isActive: value.is_active,
       sortOrder: String(value.sort_order ?? 100),
     });
+    setResumeFile(null);
+  }
+
+  async function uploadResumePdf(): Promise<{
+    fileUrl: string;
+    fileName: string;
+  } | null> {
+    if (!resumeFile) {
+      if (resumeForm.fileUrl && resumeForm.fileName) {
+        return {
+          fileUrl: resumeForm.fileUrl,
+          fileName: resumeForm.fileName,
+        };
+      }
+
+      setStatus("Please upload a PDF first.");
+      return null;
+    }
+
+    if (!resumeFile.name.toLowerCase().endsWith(".pdf")) {
+      setStatus("Only PDF files are allowed.");
+      return null;
+    }
+
+    const formData = new FormData();
+    formData.append("file", resumeFile);
+
+    const response = await fetch("/api/admin/resumes/upload", {
+      method: "POST",
+      body: formData,
+    });
+
+    const payload = await parseResponse<{
+      data?: { fileUrl: string; fileName: string };
+      error?: string;
+    }>(response);
+
+    if (!response.ok || !payload.data) {
+      setStatus(payload.error ?? "PDF upload failed.");
+      return null;
+    }
+
+    return payload.data;
   }
 
   async function saveResume() {
     setBusy(true);
-    setStatus("Saving resume...");
+    setStatus("Uploading PDF and saving resume...");
+
+    const uploaded = await uploadResumePdf();
+    if (!uploaded) {
+      setBusy(false);
+      return;
+    }
+
     const payload = {
       title: resumeForm.title,
       summary: resumeForm.summary,
-      fileUrl: resumeForm.fileUrl,
-      fileName: resumeForm.fileName,
+      fileUrl: uploaded.fileUrl,
+      fileName: uploaded.fileName,
       isActive: resumeForm.isActive,
       sortOrder: toNumber(resumeForm.sortOrder),
     };
@@ -659,6 +710,7 @@ export function ContentStudio() {
 
     await refreshResumes();
     setResumeForm(blankResume);
+    setResumeFile(null);
     setBusy(false);
     setStatus("Resume saved.");
   }
@@ -677,6 +729,7 @@ export function ContentStudio() {
     await refreshResumes();
     if (resumeForm.id === id) {
       setResumeForm(blankResume);
+      setResumeFile(null);
     }
     setBusy(false);
     setStatus("Resume deleted.");
@@ -1279,28 +1332,25 @@ export function ContentStudio() {
                     className="h-20 rounded-lg border border-oak-primary/25 bg-white px-3 py-2 text-sm"
                     placeholder="Summary"
                   />
+                  <label className="text-xs font-semibold uppercase tracking-[0.12em] text-oak-muted">
+                    PDF Upload
+                  </label>
                   <input
-                    value={resumeForm.fileUrl}
-                    onChange={(event) =>
-                      setResumeForm((prev) => ({
-                        ...prev,
-                        fileUrl: event.target.value,
-                      }))
-                    }
+                    type="file"
+                    accept="application/pdf,.pdf"
+                    onChange={(event) => {
+                      const file = event.target.files?.[0] ?? null;
+                      setResumeFile(file);
+                    }}
                     className="rounded-lg border border-oak-primary/25 bg-white px-3 py-2 text-sm"
-                    placeholder="File URL"
                   />
-                  <input
-                    value={resumeForm.fileName}
-                    onChange={(event) =>
-                      setResumeForm((prev) => ({
-                        ...prev,
-                        fileName: event.target.value,
-                      }))
-                    }
-                    className="rounded-lg border border-oak-primary/25 bg-white px-3 py-2 text-sm"
-                    placeholder="File name"
-                  />
+                  <p className="text-xs text-oak-muted">
+                    {resumeFile
+                      ? `Selected: ${resumeFile.name}`
+                      : resumeForm.fileName
+                        ? `Current file: ${resumeForm.fileName}`
+                        : "No PDF selected"}
+                  </p>
                   <div className="grid gap-2 sm:grid-cols-2">
                     <input
                       value={resumeForm.sortOrder}
@@ -1338,7 +1388,10 @@ export function ContentStudio() {
                     </button>
                     <button
                       type="button"
-                      onClick={() => setResumeForm(blankResume)}
+                      onClick={() => {
+                        setResumeForm(blankResume);
+                        setResumeFile(null);
+                      }}
                       className="rounded-lg border border-oak-primary/30 px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-oak-text"
                     >
                       Clear

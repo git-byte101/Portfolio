@@ -9,6 +9,15 @@ import {
   supabaseAdmin,
 } from "@/app/api/admin/_shared";
 
+function ensurePdfAsset(fileUrl: string, fileName: string): void {
+  const urlLooksPdf = /\.pdf($|[?#])/i.test(fileUrl.trim());
+  const nameLooksPdf = fileName.trim().toLowerCase().endsWith(".pdf");
+
+  if (!urlLooksPdf || !nameLooksPdf) {
+    throw new Error("Resume file must be a PDF upload.");
+  }
+}
+
 export async function GET(request: Request) {
   const authGuard = guardAdmin(request);
   if (authGuard) {
@@ -33,11 +42,15 @@ export async function POST(request: Request) {
   const payload = await parseJsonBody(request);
 
   try {
+    const fileUrl = ensureString(payload.fileUrl, "fileUrl");
+    const fileName = ensureString(payload.fileName, "fileName");
+    ensurePdfAsset(fileUrl, fileName);
+
     const entry = {
       title: ensureString(payload.title, "title"),
       summary: ensureString(payload.summary, "summary"),
-      file_url: ensureString(payload.fileUrl, "fileUrl"),
-      file_name: ensureString(payload.fileName, "fileName"),
+      file_url: fileUrl,
+      file_name: fileName,
       is_active: payload.isActive === true,
       sort_order: ensureNumber(payload.sortOrder, 1000),
     };

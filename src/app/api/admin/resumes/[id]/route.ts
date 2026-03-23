@@ -8,6 +8,15 @@ import {
   supabaseAdmin,
 } from "@/app/api/admin/_shared";
 
+function ensurePdfAsset(fileUrl: string, fileName: string): void {
+  const urlLooksPdf = /\.pdf($|[?#])/i.test(fileUrl.trim());
+  const nameLooksPdf = fileName.trim().toLowerCase().endsWith(".pdf");
+
+  if (!urlLooksPdf || !nameLooksPdf) {
+    throw new Error("Resume file must be a PDF upload.");
+  }
+}
+
 interface Params {
   params: Promise<{ id: string }>;
 }
@@ -40,6 +49,20 @@ export async function PATCH(request: Request, context: Params) {
 
   const { id } = await context.params;
   const payload = await parseJsonBody(request);
+
+  if (typeof payload.fileUrl === "string" || typeof payload.fileName === "string") {
+    const fileUrl = typeof payload.fileUrl === "string" ? payload.fileUrl : "";
+    const fileName = typeof payload.fileName === "string" ? payload.fileName : "";
+    if (!fileUrl || !fileName) {
+      return jsonError("Both fileUrl and fileName are required for resume updates.", 400);
+    }
+
+    try {
+      ensurePdfAsset(fileUrl, fileName);
+    } catch (error) {
+      return jsonError(error instanceof Error ? error.message : "Invalid resume file", 400);
+    }
+  }
 
   const updateInput: Record<string, unknown> = {};
 

@@ -12,6 +12,14 @@ type PanelKey =
 
 type ProjectStatus = "Production" | "Scaling" | "R&D";
 type ProjectCategory = "Programming" | "AI Automation" | "NoSQL";
+type ToastTone = "success" | "error" | "info";
+
+interface ToastState {
+  id: number;
+  tone: ToastTone;
+  message: string;
+  visible: boolean;
+}
 
 interface ProjectItem {
   id: string;
@@ -197,6 +205,8 @@ export function ContentStudio() {
   const [activePanel, setActivePanel] = useState<PanelKey>("projects");
   const [status, setStatus] = useState("Ready");
   const [busy, setBusy] = useState(false);
+  const [toast, setToast] = useState<ToastState | null>(null);
+  const [panelPulse, setPanelPulse] = useState(false);
 
   const [projects, setProjects] = useState<ProjectItem[]>([]);
   const [projectForm, setProjectForm] = useState(blankProject);
@@ -220,6 +230,67 @@ export function ContentStudio() {
     () => sectionTabs.find((tab) => tab.key === activePanel)?.label ?? "",
     [activePanel],
   );
+
+  function pushToast(message: string, tone: ToastTone): void {
+    setToast({
+      id: Date.now(),
+      tone,
+      message,
+      visible: true,
+    });
+  }
+
+  function announce(
+    message: string,
+    tone: ToastTone = "info",
+    showAsToast = false,
+  ): void {
+    setStatus(message);
+    if (showAsToast) {
+      pushToast(message, tone);
+    }
+  }
+
+  async function runBusyTask(task: () => Promise<void>): Promise<void> {
+    setBusy(true);
+    try {
+      await task();
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  useEffect(() => {
+    if (!toast || !toast.visible) {
+      return;
+    }
+
+    const hideTimer = window.setTimeout(() => {
+      setToast((current) =>
+        current ? { ...current, visible: false } : current,
+      );
+    }, 2600);
+
+    const clearTimer = window.setTimeout(() => {
+      setToast(null);
+    }, 3000);
+
+    return () => {
+      window.clearTimeout(hideTimer);
+      window.clearTimeout(clearTimer);
+    };
+  }, [toast]);
+
+  useEffect(() => {
+    setPanelPulse(true);
+    const timer = window.setTimeout(() => {
+      setPanelPulse(false);
+    }, 220);
+
+    return () => {
+      window.clearTimeout(timer);
+    };
+  }, [activePanel]);
 
   async function refreshProjects() {
     const response = await fetch("/api/admin/projects", { cache: "no-store" });
@@ -323,23 +394,26 @@ export function ContentStudio() {
   }
 
   async function refreshAll() {
-    setBusy(true);
-    setStatus("Refreshing data...");
-    try {
-      await Promise.all([
-        refreshProjects(),
-        refreshExperience(),
-        refreshSocial(),
-        refreshTools(),
-        refreshResumes(),
-        refreshProfile(),
-      ]);
-      setStatus("Data refreshed.");
-    } catch (error) {
-      setStatus(error instanceof Error ? error.message : "Refresh failed.");
-    } finally {
-      setBusy(false);
-    }
+    await runBusyTask(async () => {
+      announce("Refreshing data...");
+      try {
+        await Promise.all([
+          refreshProjects(),
+          refreshExperience(),
+          refreshSocial(),
+          refreshTools(),
+          refreshResumes(),
+          refreshProfile(),
+        ]);
+        announce("Data refreshed.", "success", true);
+      } catch (error) {
+        announce(
+          error instanceof Error ? error.message : "Refresh failed.",
+          "error",
+          true,
+        );
+      }
+    });
   }
 
   useEffect(() => {
@@ -365,65 +439,63 @@ export function ContentStudio() {
   }
 
   async function saveProject() {
-    setBusy(true);
-    setStatus("Saving project...");
+    await runBusyTask(async () => {
+      announce("Saving project...");
 
-    const payload = {
-      title: projectForm.title,
-      category: projectForm.category,
-      status: projectForm.status,
-      summary: projectForm.summary,
-      techStack: fromCsv(projectForm.techStack),
-      slug: projectForm.slug,
-      version: projectForm.version,
-      thumbnailSrc: projectForm.thumbnailSrc,
-      repoUrl: projectForm.repoUrl,
-      liveUrl: projectForm.liveUrl,
-      featured: projectForm.featured,
-      sortOrder: toNumber(projectForm.sortOrder),
-    };
+      const payload = {
+        title: projectForm.title,
+        category: projectForm.category,
+        status: projectForm.status,
+        summary: projectForm.summary,
+        techStack: fromCsv(projectForm.techStack),
+        slug: projectForm.slug,
+        version: projectForm.version,
+        thumbnailSrc: projectForm.thumbnailSrc,
+        repoUrl: projectForm.repoUrl,
+        liveUrl: projectForm.liveUrl,
+        featured: projectForm.featured,
+        sortOrder: toNumber(projectForm.sortOrder),
+      };
 
-    const isEdit = Boolean(projectForm.id);
-    const endpoint = isEdit
-      ? `/api/admin/projects/${projectForm.id}`
-      : "/api/admin/projects";
+      const isEdit = Boolean(projectForm.id);
+      const endpoint = isEdit
+        ? `/api/admin/projects/${projectForm.id}`
+        : "/api/admin/projects";
 
-    const response = await fetch(endpoint, {
-      method: isEdit ? "PATCH" : "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
+      const response = await fetch(endpoint, {
+        method: isEdit ? "PATCH" : "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const result = await parseResponse<{ error?: string }>(response);
+
+      if (!response.ok) {
+        announce(result.error ?? "Project save failed.", "error", true);
+        return;
+      }
+
+      await refreshProjects();
+      setProjectForm(blankProject);
+      announce("Project saved.", "success", true);
     });
-    const result = await parseResponse<{ error?: string }>(response);
-
-    if (!response.ok) {
-      setBusy(false);
-      setStatus(result.error ?? "Project save failed.");
-      return;
-    }
-
-    await refreshProjects();
-    setProjectForm(blankProject);
-    setBusy(false);
-    setStatus("Project saved.");
   }
 
   async function removeProject(id: string) {
-    setBusy(true);
-    setStatus("Deleting project...");
-    const response = await fetch(`/api/admin/projects/${id}`, {
-      method: "DELETE",
+    await runBusyTask(async () => {
+      announce("Deleting project...");
+      const response = await fetch(`/api/admin/projects/${id}`, {
+        method: "DELETE",
+      });
+      if (!response.ok) {
+        announce("Project delete failed.", "error", true);
+        return;
+      }
+      await refreshProjects();
+      if (projectForm.id === id) {
+        setProjectForm(blankProject);
+      }
+      announce("Project deleted.", "success", true);
     });
-    if (!response.ok) {
-      setBusy(false);
-      setStatus("Project delete failed.");
-      return;
-    }
-    await refreshProjects();
-    if (projectForm.id === id) {
-      setProjectForm(blankProject);
-    }
-    setBusy(false);
-    setStatus("Project deleted.");
   }
 
   function pickExperience(item: ExperienceItem) {
@@ -439,58 +511,56 @@ export function ContentStudio() {
   }
 
   async function saveExperience() {
-    setBusy(true);
-    setStatus("Saving experience...");
-    const payload = {
-      period: experienceForm.period,
-      role: experienceForm.role,
-      company: experienceForm.company,
-      summary: experienceForm.summary,
-      highlights: fromLines(experienceForm.highlightsText),
-      sortOrder: toNumber(experienceForm.sortOrder),
-    };
+    await runBusyTask(async () => {
+      announce("Saving experience...");
+      const payload = {
+        period: experienceForm.period,
+        role: experienceForm.role,
+        company: experienceForm.company,
+        summary: experienceForm.summary,
+        highlights: fromLines(experienceForm.highlightsText),
+        sortOrder: toNumber(experienceForm.sortOrder),
+      };
 
-    const isEdit = Boolean(experienceForm.id);
-    const endpoint = isEdit
-      ? `/api/admin/experience/${experienceForm.id}`
-      : "/api/admin/experience";
+      const isEdit = Boolean(experienceForm.id);
+      const endpoint = isEdit
+        ? `/api/admin/experience/${experienceForm.id}`
+        : "/api/admin/experience";
 
-    const response = await fetch(endpoint, {
-      method: isEdit ? "PATCH" : "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
+      const response = await fetch(endpoint, {
+        method: isEdit ? "PATCH" : "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const result = await parseResponse<{ error?: string }>(response);
+
+      if (!response.ok) {
+        announce(result.error ?? "Experience save failed.", "error", true);
+        return;
+      }
+
+      await refreshExperience();
+      setExperienceForm(blankExperience);
+      announce("Experience saved.", "success", true);
     });
-    const result = await parseResponse<{ error?: string }>(response);
-
-    if (!response.ok) {
-      setBusy(false);
-      setStatus(result.error ?? "Experience save failed.");
-      return;
-    }
-
-    await refreshExperience();
-    setExperienceForm(blankExperience);
-    setBusy(false);
-    setStatus("Experience saved.");
   }
 
   async function removeExperience(id: string) {
-    setBusy(true);
-    setStatus("Deleting experience...");
-    const response = await fetch(`/api/admin/experience/${id}`, {
-      method: "DELETE",
+    await runBusyTask(async () => {
+      announce("Deleting experience...");
+      const response = await fetch(`/api/admin/experience/${id}`, {
+        method: "DELETE",
+      });
+      if (!response.ok) {
+        announce("Experience delete failed.", "error", true);
+        return;
+      }
+      await refreshExperience();
+      if (experienceForm.id === id) {
+        setExperienceForm(blankExperience);
+      }
+      announce("Experience deleted.", "success", true);
     });
-    if (!response.ok) {
-      setBusy(false);
-      setStatus("Experience delete failed.");
-      return;
-    }
-    await refreshExperience();
-    if (experienceForm.id === id) {
-      setExperienceForm(blankExperience);
-    }
-    setBusy(false);
-    setStatus("Experience deleted.");
   }
 
   function pickSocial(item: unknown) {
@@ -504,55 +574,53 @@ export function ContentStudio() {
   }
 
   async function saveSocial() {
-    setBusy(true);
-    setStatus("Saving social link...");
-    const payload = {
-      label: socialForm.label,
-      href: socialForm.href,
-      sortOrder: toNumber(socialForm.sortOrder),
-    };
+    await runBusyTask(async () => {
+      announce("Saving social link...");
+      const payload = {
+        label: socialForm.label,
+        href: socialForm.href,
+        sortOrder: toNumber(socialForm.sortOrder),
+      };
 
-    const isEdit = Boolean(socialForm.id);
-    const endpoint = isEdit
-      ? `/api/admin/social-links/${socialForm.id}`
-      : "/api/admin/social-links";
+      const isEdit = Boolean(socialForm.id);
+      const endpoint = isEdit
+        ? `/api/admin/social-links/${socialForm.id}`
+        : "/api/admin/social-links";
 
-    const response = await fetch(endpoint, {
-      method: isEdit ? "PATCH" : "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
+      const response = await fetch(endpoint, {
+        method: isEdit ? "PATCH" : "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const result = await parseResponse<{ error?: string }>(response);
+
+      if (!response.ok) {
+        announce(result.error ?? "Social link save failed.", "error", true);
+        return;
+      }
+
+      await refreshSocial();
+      setSocialForm(blankSocial);
+      announce("Social link saved.", "success", true);
     });
-    const result = await parseResponse<{ error?: string }>(response);
-
-    if (!response.ok) {
-      setBusy(false);
-      setStatus(result.error ?? "Social link save failed.");
-      return;
-    }
-
-    await refreshSocial();
-    setSocialForm(blankSocial);
-    setBusy(false);
-    setStatus("Social link saved.");
   }
 
   async function removeSocial(id: string) {
-    setBusy(true);
-    setStatus("Deleting social link...");
-    const response = await fetch(`/api/admin/social-links/${id}`, {
-      method: "DELETE",
+    await runBusyTask(async () => {
+      announce("Deleting social link...");
+      const response = await fetch(`/api/admin/social-links/${id}`, {
+        method: "DELETE",
+      });
+      if (!response.ok) {
+        announce("Social link delete failed.", "error", true);
+        return;
+      }
+      await refreshSocial();
+      if (socialForm.id === id) {
+        setSocialForm(blankSocial);
+      }
+      announce("Social link deleted.", "success", true);
     });
-    if (!response.ok) {
-      setBusy(false);
-      setStatus("Social link delete failed.");
-      return;
-    }
-    await refreshSocial();
-    if (socialForm.id === id) {
-      setSocialForm(blankSocial);
-    }
-    setBusy(false);
-    setStatus("Social link deleted.");
   }
 
   function pickTool(item: unknown) {
@@ -565,54 +633,52 @@ export function ContentStudio() {
   }
 
   async function saveTool() {
-    setBusy(true);
-    setStatus("Saving tool badge...");
-    const payload = {
-      name: toolForm.name,
-      sortOrder: toNumber(toolForm.sortOrder),
-    };
+    await runBusyTask(async () => {
+      announce("Saving tool badge...");
+      const payload = {
+        name: toolForm.name,
+        sortOrder: toNumber(toolForm.sortOrder),
+      };
 
-    const isEdit = Boolean(toolForm.id);
-    const endpoint = isEdit
-      ? `/api/admin/tool-badges/${toolForm.id}`
-      : "/api/admin/tool-badges";
+      const isEdit = Boolean(toolForm.id);
+      const endpoint = isEdit
+        ? `/api/admin/tool-badges/${toolForm.id}`
+        : "/api/admin/tool-badges";
 
-    const response = await fetch(endpoint, {
-      method: isEdit ? "PATCH" : "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
+      const response = await fetch(endpoint, {
+        method: isEdit ? "PATCH" : "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const result = await parseResponse<{ error?: string }>(response);
+
+      if (!response.ok) {
+        announce(result.error ?? "Tool badge save failed.", "error", true);
+        return;
+      }
+
+      await refreshTools();
+      setToolForm(blankTool);
+      announce("Tool badge saved.", "success", true);
     });
-    const result = await parseResponse<{ error?: string }>(response);
-
-    if (!response.ok) {
-      setBusy(false);
-      setStatus(result.error ?? "Tool badge save failed.");
-      return;
-    }
-
-    await refreshTools();
-    setToolForm(blankTool);
-    setBusy(false);
-    setStatus("Tool badge saved.");
   }
 
   async function removeTool(id: string) {
-    setBusy(true);
-    setStatus("Deleting tool badge...");
-    const response = await fetch(`/api/admin/tool-badges/${id}`, {
-      method: "DELETE",
+    await runBusyTask(async () => {
+      announce("Deleting tool badge...");
+      const response = await fetch(`/api/admin/tool-badges/${id}`, {
+        method: "DELETE",
+      });
+      if (!response.ok) {
+        announce("Tool badge delete failed.", "error", true);
+        return;
+      }
+      await refreshTools();
+      if (toolForm.id === id) {
+        setToolForm(blankTool);
+      }
+      announce("Tool badge deleted.", "success", true);
     });
-    if (!response.ok) {
-      setBusy(false);
-      setStatus("Tool badge delete failed.");
-      return;
-    }
-    await refreshTools();
-    if (toolForm.id === id) {
-      setToolForm(blankTool);
-    }
-    setBusy(false);
-    setStatus("Tool badge deleted.");
   }
 
   function pickResume(item: unknown) {
@@ -641,12 +707,12 @@ export function ContentStudio() {
         };
       }
 
-      setStatus("Please upload a PDF first.");
+      announce("Please upload a PDF first.", "error", true);
       return null;
     }
 
     if (!resumeFile.name.toLowerCase().endsWith(".pdf")) {
-      setStatus("Only PDF files are allowed.");
+      announce("Only PDF files are allowed.", "error", true);
       return null;
     }
 
@@ -664,116 +730,114 @@ export function ContentStudio() {
     }>(response);
 
     if (!response.ok || !payload.data) {
-      setStatus(payload.error ?? "PDF upload failed.");
+      announce(payload.error ?? "PDF upload failed.", "error", true);
       return null;
     }
+
+    announce("PDF uploaded successfully.", "success", true);
 
     return payload.data;
   }
 
   async function saveResume() {
-    setBusy(true);
-    setStatus("Uploading PDF and saving resume...");
+    await runBusyTask(async () => {
+      announce("Uploading PDF and saving resume...");
 
-    const uploaded = await uploadResumePdf();
-    if (!uploaded) {
-      setBusy(false);
-      return;
-    }
+      const uploaded = await uploadResumePdf();
+      if (!uploaded) {
+        return;
+      }
 
-    const payload = {
-      title: resumeForm.title,
-      summary: resumeForm.summary,
-      fileUrl: uploaded.fileUrl,
-      fileName: uploaded.fileName,
-      isActive: resumeForm.isActive,
-      sortOrder: toNumber(resumeForm.sortOrder),
-    };
+      const payload = {
+        title: resumeForm.title,
+        summary: resumeForm.summary,
+        fileUrl: uploaded.fileUrl,
+        fileName: uploaded.fileName,
+        isActive: resumeForm.isActive,
+        sortOrder: toNumber(resumeForm.sortOrder),
+      };
 
-    const isEdit = Boolean(resumeForm.id);
-    const endpoint = isEdit
-      ? `/api/admin/resumes/${resumeForm.id}`
-      : "/api/admin/resumes";
+      const isEdit = Boolean(resumeForm.id);
+      const endpoint = isEdit
+        ? `/api/admin/resumes/${resumeForm.id}`
+        : "/api/admin/resumes";
 
-    const response = await fetch(endpoint, {
-      method: isEdit ? "PATCH" : "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
+      const response = await fetch(endpoint, {
+        method: isEdit ? "PATCH" : "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const result = await parseResponse<{ error?: string }>(response);
+
+      if (!response.ok) {
+        announce(result.error ?? "Resume save failed.", "error", true);
+        return;
+      }
+
+      await refreshResumes();
+      setResumeForm(blankResume);
+      setResumeFile(null);
+      announce("Resume saved.", "success", true);
     });
-    const result = await parseResponse<{ error?: string }>(response);
-
-    if (!response.ok) {
-      setBusy(false);
-      setStatus(result.error ?? "Resume save failed.");
-      return;
-    }
-
-    await refreshResumes();
-    setResumeForm(blankResume);
-    setResumeFile(null);
-    setBusy(false);
-    setStatus("Resume saved.");
   }
 
   async function removeResume(id: string) {
-    setBusy(true);
-    setStatus("Deleting resume...");
-    const response = await fetch(`/api/admin/resumes/${id}`, {
-      method: "DELETE",
+    await runBusyTask(async () => {
+      announce("Deleting resume...");
+      const response = await fetch(`/api/admin/resumes/${id}`, {
+        method: "DELETE",
+      });
+      if (!response.ok) {
+        announce("Resume delete failed.", "error", true);
+        return;
+      }
+      await refreshResumes();
+      if (resumeForm.id === id) {
+        setResumeForm(blankResume);
+        setResumeFile(null);
+      }
+      announce("Resume deleted.", "success", true);
     });
-    if (!response.ok) {
-      setBusy(false);
-      setStatus("Resume delete failed.");
-      return;
-    }
-    await refreshResumes();
-    if (resumeForm.id === id) {
-      setResumeForm(blankResume);
-      setResumeFile(null);
-    }
-    setBusy(false);
-    setStatus("Resume deleted.");
   }
 
   async function saveProfile() {
-    setBusy(true);
-    setStatus("Saving profile settings...");
-    const payload = {
-      name: profileForm.name,
-      sidebarFootnote: profileForm.sidebarFootnote,
-      dashboardTitle: profileForm.dashboardTitle,
-      dashboardSubtitle: profileForm.dashboardSubtitle,
-      profilePhotoSrc: profileForm.profilePhotoSrc,
-      overviewHeading: profileForm.overviewHeading,
-      overviewIntro: profileForm.overviewIntro,
-      learnerHeading: profileForm.learnerHeading,
-      learnerIntro: profileForm.learnerIntro,
-      availabilityText: profileForm.availabilityText,
-      targetText: profileForm.targetText,
-      workStyleText: profileForm.workStyleText,
-      foundationAreas: fromLines(profileForm.foundationAreasText),
-      contactHeading: profileForm.contactHeading,
-      contactIntro: profileForm.contactIntro,
-      contactBio: profileForm.contactBio,
-      contactHighlights: fromLines(profileForm.contactHighlightsText),
-    };
+    await runBusyTask(async () => {
+      announce("Saving profile settings...");
+      const payload = {
+        name: profileForm.name,
+        sidebarFootnote: profileForm.sidebarFootnote,
+        dashboardTitle: profileForm.dashboardTitle,
+        dashboardSubtitle: profileForm.dashboardSubtitle,
+        profilePhotoSrc: profileForm.profilePhotoSrc,
+        overviewHeading: profileForm.overviewHeading,
+        overviewIntro: profileForm.overviewIntro,
+        learnerHeading: profileForm.learnerHeading,
+        learnerIntro: profileForm.learnerIntro,
+        availabilityText: profileForm.availabilityText,
+        targetText: profileForm.targetText,
+        workStyleText: profileForm.workStyleText,
+        foundationAreas: fromLines(profileForm.foundationAreasText),
+        contactHeading: profileForm.contactHeading,
+        contactIntro: profileForm.contactIntro,
+        contactBio: profileForm.contactBio,
+        contactHighlights: fromLines(profileForm.contactHighlightsText),
+      };
 
-    const response = await fetch("/api/admin/profile", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
+      const response = await fetch("/api/admin/profile", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const result = await parseResponse<{ error?: string }>(response);
+
+      if (!response.ok) {
+        announce(result.error ?? "Profile save failed.", "error", true);
+        return;
+      }
+
+      await refreshProfile();
+      announce("Profile settings saved.", "success", true);
     });
-    const result = await parseResponse<{ error?: string }>(response);
-
-    if (!response.ok) {
-      setBusy(false);
-      setStatus(result.error ?? "Profile save failed.");
-      return;
-    }
-
-    await refreshProfile();
-    setBusy(false);
-    setStatus("Profile settings saved.");
   }
 
   async function signOut() {
@@ -781,8 +845,29 @@ export function ContentStudio() {
     window.location.href = "/admin/login";
   }
 
+  const toastToneClass =
+    toast?.tone === "success"
+      ? "border-emerald-300/70 bg-emerald-50 text-emerald-900"
+      : toast?.tone === "error"
+        ? "border-red-300/70 bg-red-50 text-red-900"
+        : "border-sky-300/70 bg-sky-50 text-sky-900";
+
   return (
     <section className="mx-auto flex w-full max-w-7xl flex-col gap-4 pb-4 md:gap-5 md:pb-6">
+      {toast ? (
+        <div className="pointer-events-none fixed right-4 top-4 z-50">
+          <div
+            className={`min-w-55 rounded-xl border px-4 py-3 text-sm font-semibold shadow-lg transition-all duration-300 ${toastToneClass} ${
+              toast.visible
+                ? "translate-y-0 scale-100 opacity-100"
+                : "-translate-y-2 scale-95 opacity-0"
+            }`}
+          >
+            {toast.message}
+          </div>
+        </div>
+      ) : null}
+
       <section className="mecha-panel rounded-2xl border border-oak-primary/20 bg-oak-surface/75 p-5 md:p-6">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
@@ -814,7 +899,13 @@ export function ContentStudio() {
             </button>
           </div>
         </div>
-        <p className="mt-3 text-xs text-oak-muted">{status}</p>
+        <p
+          className={`mt-3 text-xs text-oak-muted transition-opacity duration-200 ${
+            busy ? "opacity-90" : "opacity-100"
+          }`}
+        >
+          {status}
+        </p>
       </section>
 
       <section className="mecha-panel rounded-2xl border border-oak-primary/20 bg-oak-surface/80 p-3">
@@ -837,7 +928,13 @@ export function ContentStudio() {
       </section>
 
       <section className="grid grid-cols-1 gap-4">
-        <article className="mecha-panel rounded-2xl border border-oak-primary/20 bg-oak-surface/80 p-4">
+        <article
+          className={`mecha-panel rounded-2xl border border-oak-primary/20 bg-oak-surface/80 p-4 transition-all duration-300 ${
+            panelPulse
+              ? "translate-y-1 opacity-90"
+              : "translate-y-0 opacity-100"
+          }`}
+        >
           <h2 className="text-lg font-bold text-oak-text">{activeLabel}</h2>
 
           {activePanel === "projects" ? (

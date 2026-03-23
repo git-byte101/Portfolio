@@ -204,20 +204,25 @@ const getCachedProfileSettings = unstable_cache(
       return DEFAULT_PROFILE_SETTINGS;
     }
 
-    const supabase = getSupabaseAdminClient();
-    const { data, error } = await withQueryTimeout(
-      supabase.from("profile_settings").select("*").eq("id", "default").maybeSingle(),
-      "profile settings query",
-    );
+    try {
+      const supabase = getSupabaseAdminClient();
+      const { data, error } = await withQueryTimeout(
+        supabase.from("profile_settings").select("*").eq("id", "default").maybeSingle(),
+        "profile settings query",
+      );
 
-    if (error || !data) {
-      if (error) {
-        console.error("Failed to load profile settings from Supabase", error);
+      if (error || !data) {
+        if (error) {
+          console.error("Failed to load profile settings from Supabase", error);
+        }
+        return DEFAULT_PROFILE_SETTINGS;
       }
+
+      return mapProfile(data as SupabaseProfileRow);
+    } catch (error) {
+      console.error("Profile settings request failed; using defaults.", error);
       return DEFAULT_PROFILE_SETTINGS;
     }
-
-    return mapProfile(data as SupabaseProfileRow);
   },
   ["site-profile-settings"],
   {
@@ -236,31 +241,36 @@ const getCachedExperience = unstable_cache(
       return DEFAULT_EXPERIENCE;
     }
 
-    const supabase = getSupabaseAdminClient();
-    const { data, error } = await withQueryTimeout(
-      supabase
-        .from("experience_entries")
-        .select("id, period, role, company, summary, highlights, sort_order")
-        .order("sort_order", { ascending: true }),
-      "experience query",
-    );
+    try {
+      const supabase = getSupabaseAdminClient();
+      const { data, error } = await withQueryTimeout(
+        supabase
+          .from("experience_entries")
+          .select("id, period, role, company, summary, highlights, sort_order")
+          .order("sort_order", { ascending: true }),
+        "experience query",
+      );
 
-    if (error || !data || data.length === 0) {
-      if (error) {
-        console.error("Failed to load experience from Supabase", error);
+      if (error || !data || data.length === 0) {
+        if (error) {
+          console.error("Failed to load experience from Supabase", error);
+        }
+        return DEFAULT_EXPERIENCE;
       }
+
+      return data.map((row) => ({
+        id: row.id as string,
+        period: (row.period as string) ?? "",
+        role: (row.role as string) ?? "",
+        company: (row.company as string) ?? "",
+        summary: (row.summary as string) ?? "",
+        highlights: normalizeStringArray(row.highlights),
+        sortOrder: Number(row.sort_order ?? 0),
+      }));
+    } catch (error) {
+      console.error("Experience request failed; using defaults.", error);
       return DEFAULT_EXPERIENCE;
     }
-
-    return data.map((row) => ({
-      id: row.id as string,
-      period: (row.period as string) ?? "",
-      role: (row.role as string) ?? "",
-      company: (row.company as string) ?? "",
-      summary: (row.summary as string) ?? "",
-      highlights: normalizeStringArray(row.highlights),
-      sortOrder: Number(row.sort_order ?? 0),
-    }));
   },
   ["site-experience"],
   {
@@ -279,28 +289,33 @@ const getCachedSocialLinks = unstable_cache(
       return DEFAULT_SOCIAL_LINKS;
     }
 
-    const supabase = getSupabaseAdminClient();
-    const { data, error } = await withQueryTimeout(
-      supabase
-        .from("social_links")
-        .select("id, label, href, sort_order")
-        .order("sort_order", { ascending: true }),
-      "social links query",
-    );
+    try {
+      const supabase = getSupabaseAdminClient();
+      const { data, error } = await withQueryTimeout(
+        supabase
+          .from("social_links")
+          .select("id, label, href, sort_order")
+          .order("sort_order", { ascending: true }),
+        "social links query",
+      );
 
-    if (error || !data || data.length === 0) {
-      if (error) {
-        console.error("Failed to load social links from Supabase", error);
+      if (error || !data || data.length === 0) {
+        if (error) {
+          console.error("Failed to load social links from Supabase", error);
+        }
+        return DEFAULT_SOCIAL_LINKS;
       }
+
+      return data.map((row) => ({
+        id: row.id as string,
+        label: (row.label as string) ?? "",
+        href: (row.href as string) ?? "",
+        sortOrder: Number(row.sort_order ?? 0),
+      }));
+    } catch (error) {
+      console.error("Social links request failed; using defaults.", error);
       return DEFAULT_SOCIAL_LINKS;
     }
-
-    return data.map((row) => ({
-      id: row.id as string,
-      label: (row.label as string) ?? "",
-      href: (row.href as string) ?? "",
-      sortOrder: Number(row.sort_order ?? 0),
-    }));
   },
   ["site-social-links"],
   {
@@ -319,27 +334,32 @@ const getCachedToolBadges = unstable_cache(
       return DEFAULT_TOOL_BADGES;
     }
 
-    const supabase = getSupabaseAdminClient();
-    const { data, error } = await withQueryTimeout(
-      supabase
-        .from("tool_badges")
-        .select("id, name, sort_order")
-        .order("sort_order", { ascending: true }),
-      "tool badges query",
-    );
+    try {
+      const supabase = getSupabaseAdminClient();
+      const { data, error } = await withQueryTimeout(
+        supabase
+          .from("tool_badges")
+          .select("id, name, sort_order")
+          .order("sort_order", { ascending: true }),
+        "tool badges query",
+      );
 
-    if (error || !data || data.length === 0) {
-      if (error) {
-        console.error("Failed to load tool badges from Supabase", error);
+      if (error || !data || data.length === 0) {
+        if (error) {
+          console.error("Failed to load tool badges from Supabase", error);
+        }
+        return DEFAULT_TOOL_BADGES;
       }
+
+      return data.map((row) => ({
+        id: row.id as string,
+        name: (row.name as string) ?? "",
+        sortOrder: Number(row.sort_order ?? 0),
+      }));
+    } catch (error) {
+      console.error("Tool badges request failed; using defaults.", error);
       return DEFAULT_TOOL_BADGES;
     }
-
-    return data.map((row) => ({
-      id: row.id as string,
-      name: (row.name as string) ?? "",
-      sortOrder: Number(row.sort_order ?? 0),
-    }));
   },
   ["site-tool-badges"],
   {
@@ -358,31 +378,36 @@ const getCachedResumes = unstable_cache(
       return DEFAULT_RESUMES;
     }
 
-    const supabase = getSupabaseAdminClient();
-    const { data, error } = await withQueryTimeout(
-      supabase
-        .from("resume_assets")
-        .select("id, title, summary, file_url, file_name, is_active, sort_order")
-        .order("sort_order", { ascending: true }),
-      "resume assets query",
-    );
+    try {
+      const supabase = getSupabaseAdminClient();
+      const { data, error } = await withQueryTimeout(
+        supabase
+          .from("resume_assets")
+          .select("id, title, summary, file_url, file_name, is_active, sort_order")
+          .order("sort_order", { ascending: true }),
+        "resume assets query",
+      );
 
-    if (error || !data || data.length === 0) {
-      if (error) {
-        console.error("Failed to load resumes from Supabase", error);
+      if (error || !data || data.length === 0) {
+        if (error) {
+          console.error("Failed to load resumes from Supabase", error);
+        }
+        return DEFAULT_RESUMES;
       }
+
+      return data.map((row) => ({
+        id: row.id as string,
+        title: (row.title as string) ?? "Resume",
+        summary: (row.summary as string) ?? "",
+        fileUrl: (row.file_url as string) ?? "",
+        fileName: (row.file_name as string) ?? "resume.pdf",
+        isActive: row.is_active === true,
+        sortOrder: Number(row.sort_order ?? 0),
+      }));
+    } catch (error) {
+      console.error("Resume assets request failed; using defaults.", error);
       return DEFAULT_RESUMES;
     }
-
-    return data.map((row) => ({
-      id: row.id as string,
-      title: (row.title as string) ?? "Resume",
-      summary: (row.summary as string) ?? "",
-      fileUrl: (row.file_url as string) ?? "",
-      fileName: (row.file_name as string) ?? "resume.pdf",
-      isActive: row.is_active === true,
-      sortOrder: Number(row.sort_order ?? 0),
-    }));
   },
   ["site-resumes"],
   {
